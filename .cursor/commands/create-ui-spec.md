@@ -5,7 +5,7 @@
 ````markdown
 # Create UI Specification from Confirmed Mockup
 
-**目的**: 基于已确认的 Mockup 和 `./.blueprint/PRD.md`，提炼结构化、可执行、可供开发交接使用的 UI 设计规范文档，输出到 `./.blueprint/UI_Spec.md`。
+**目的**: 基于已确认的 Mockup 和 `./.blueprint/PRD.md`，提炼结构化、可执行、可供开发交接使用的 UI 设计规范文档，输出到 `./.blueprint/UI_Spec.md`，并同步生成可视化设计系统文件 `./.blueprint/mockup/design-system.html`。
 
 ## 前置条件
 - 必须存在：`./.blueprint/PRD.md`
@@ -17,15 +17,17 @@
 
 ## 产出
 - 输出并保存到：`./.blueprint/UI_Spec.md`
+- 同步输出并保存到：`./.blueprint/mockup/design-system.html`
 
 ## 文档目标
-这份文档不再负责“预先推演设计”，而是负责：
+这组产物不再负责“预先推演设计”，而是负责：
 
 1. **提炼设计系统**
 2. **结构化页面规范**
 3. **沉淀组件规则**
 4. **补充交互、响应式、可访问性要求**
 5. **为后续开发实现提供统一指导**
+6. **提供可浏览的设计系统预览**
 
 它描述的是：  
 **已经在 Mockup 中被验证过的视觉结果**，而不是尚未验证的设计猜想。
@@ -61,12 +63,13 @@
 # UI Spec Agent - 设计系统提炼与开发交接专家
 
 ## 你的角色
-你是一个专业的 UI 规范提炼 Agent，负责从**已确认的 Mockup**与 PRD 中提炼视觉系统、页面规范、组件规范，并输出为结构化的开发交接文档。
+你是一个专业的 UI 规范提炼 Agent，负责从**已确认的 Mockup**与 PRD 中提炼视觉系统、页面规范、组件规范，并输出为结构化的开发交接文档，以及配套的可视化设计系统预览文件。
 
 你的输出将被用于：
 - **Claude Code**：实现正式前端
 - **人类设计师 / 产品负责人**：复核已确认设计
 - **团队协作**：确保后续实现保持视觉一致性
+- **浏览器预览**：快速查看 token、组件与样式规则摘要
 
 ## 核心原则
 - ✅ **以结果为准**：文档必须服从确认版 Mockup
@@ -126,7 +129,9 @@ python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "<图表场景>" --domain
 
 ### 第 1 步：提炼设计系统
 
-从确认版 Mockup 中提炼并写入 `UI_Spec.md`：
+从确认版 Mockup 中提炼，并同时服务于：
+- `UI_Spec.md` 中的结构化文档描述
+- `./.blueprint/mockup/design-system.html` 中的可视化展示
 
 #### 1.1 色彩系统（Colors）
 识别并整理：
@@ -282,15 +287,29 @@ python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "<图表场景>" --domain
 
 ---
 
-### 第 6 步：输出 UI Spec
+### 第 6 步：输出 UI Spec 与 Design System Preview
 
 将结果写入：
 - `./.blueprint/UI_Spec.md`
+- `./.blueprint/mockup/design-system.html`
 
 该文档将作为：
 - 已确认视觉结果的设计规范
 - 后续开发交接文档
 - 设计系统与组件规则的单一参考来源之一
+
+`design-system.html` 应作为 `UI_Spec.md` 的可视化配套文件，至少包含：
+- 颜色 token 展示
+- 字体层级示例
+- 间距 / 圆角 / 阴影规则摘要
+- 核心组件示例（如 Button、Card、Input、Table、Badge，按实际存在情况）
+- 关键状态展示（如 Hover / Focus / Disabled / Success / Error，按实际存在情况）
+- 必要的页面或区块风格摘要
+
+要求：
+- 与 `UI_Spec.md` 内容保持一致
+- 优先使用单 HTML 自包含方式，便于本地直接打开预览
+- 如果文件已存在，应基于最新提炼结果更新，而不是跳过
 
 ---
 
@@ -348,6 +367,7 @@ python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "<图表场景>" --domain
 
 ### 一致性
 - [ ] 文档与确认版 Mockup 一致
+- [ ] `design-system.html` 与 `UI_Spec.md` 一致
 - [ ] 页面结构描述可映射回真实页面
 - [ ] 组件规则与页面中实际组件一致
 
@@ -362,6 +382,7 @@ python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "<图表场景>" --domain
 - [ ] 响应式规则足够明确
 - [ ] 可访问性要求可执行
 - [ ] 重点区域的实现优先级清晰
+- [ ] `design-system.html` 可作为快速对照预览使用
 
 ### 完整度
 - [ ] 页面规范覆盖关键页面
@@ -408,6 +429,7 @@ python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "<图表场景>" --domain
 
 📄 文件路径:
 ./.blueprint/UI_Spec.md
+./.blueprint/mockup/design-system.html
 
 📊 文档内容:
 - ✅ 基于确认版 Mockup 提炼的设计系统
@@ -417,8 +439,9 @@ python3 .cursor/skills/ui-ux-pro-max/scripts/search.py "<图表场景>" --domain
 - ✅ 响应式规则
 - ✅ 可访问性要求
 - ✅ 面向开发的实现指导
+- ✅ 可视化设计系统预览页
 
 🎯 下一步:
-将 `UI_Spec.md` 与确认版 Mockup 一起提供给 Claude Code，
+将 `UI_Spec.md`、`design-system.html` 与确认版 Mockup 一起提供给 Claude Code，
 用于正式前端开发实现。
 ```

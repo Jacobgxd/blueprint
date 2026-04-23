@@ -9,11 +9,14 @@
 ```
 .blueprint/                  # 规格文档区（AI 读取的唯一真相来源）
 ├── CONTEXT.md               # AI 入口文件，指向当前活跃文档
-├── PRD_V{N}.md              # 产品需求文档（版本化）
-├── UI_Spec.md               # UI 规范文档
+├── PRD.md / PRD_V{N}.md     # 当前生效 PRD / 版本化 PRD
+├── UI_Spec.md               # 基于确认版 Mockup 提炼出的 UI 规范文档
 ├── Tech_Spec.md             # 技术方案文档
 ├── Test_Spec.md             # 测试方案文档
-└── mockup/                  # 可运行静态 Mockup（React + Vite）
+└── mockup/                  # 可运行静态 Mockup（单 HTML 优先）
+    ├── index.html           # 当前确认版 Mockup
+    ├── design-system.html   # 与 UI Spec 同步生成的设计系统预览
+    └── design-notes.md      # 可选设计说明
 
 reports/                     # 执行记录区（证据、报告）
 ├── mockup-reviews/          # Mockup Review 报告（版本化，保留历史）
@@ -40,12 +43,12 @@ issues/                      # 问题追踪
 
 ```
 Define 阶段（生成规格文档）
-  /create-prd
-      ↓
-  /create-ui-spec
+  /create-prd（如需）
       ↓
   /create-mockup  →  /review-mockup（人工确认，可多轮）
-      ↓                   ↑ 不满足则返回修改 PRD/UI Spec
+      ↓                   ↑ 不满足则返回修改 Mockup / PRD
+  /create-ui-spec（同时生成 design-system.html）
+      ↓
   /create-tech-spec（资深工程师 Review）
       ↓
   /create-test-spec（测试工程师 Review）
@@ -76,33 +79,33 @@ Implement 阶段（编码）
 
 ---
 
-#### `/create-ui-spec` — UI Design Agent
-**输出**: `.blueprint/UI_Spec.md`
-**前置**: `.blueprint/PRD_V{N}.md`
-
-将 PRD 转化为结构化 UI 规范，包含设计系统、页面视觉细节、组件规范、交互模式、响应式断点、可访问性（WCAG 2.1 AA）。
-
----
-
 #### `/create-mockup` — Mockup Agent
-**输出**: `.blueprint/mockup/`（React + Vite 可运行项目）
-**前置**: `.blueprint/UI_Spec.md`
+**输出**: `.blueprint/mockup/index.html`（单 HTML 优先，可附带 `design-notes.md`）
+**前置**: 当前生效 PRD
 
-基于 UI 规范生成可在浏览器中运行的静态页面，供设计师和 PM 验证视觉效果和交互逻辑。
+基于 PRD 直接生成可在浏览器中运行的静态页面，快速验证视觉气质、页面层级、信息密度和关键交互方向。该命令应优先配合 `.cursor/skills/ui-ux-pro-max/SKILL.md` 使用，用于生成设计系统建议、风格方向、字体/配色/UX 规则与反模式提醒。
 
 ---
 
 #### `/review-mockup` — Mockup Review Agent
 **输出**: `reports/mockup-reviews/MOCKUP_REVIEW_REPORT_v{n}_{timestamp}.md`
-**前置**: `.blueprint/UI_Spec.md` + `.blueprint/mockup/`
+**前置**: `.blueprint/mockup/`（若已有 UI Spec，可一并对照）
 
-自动对比 Mockup 代码与 UI 规范，生成版本化 Review 报告（不覆盖历史）。评分 ≥ 8.5 且无高优先级问题时，可判定为通过，进入下一步。每次迭代修改 PRD/UI Spec 时需记录变更原因。
+自动检查 Mockup 的页面结构、设计一致性和交互表达，必要时对照已有 UI Spec。评分 ≥ 8.5 且无高优先级问题时，可判定为通过，进入下一步。每次迭代修改 Mockup 或 PRD 时需记录变更原因。
+
+---
+
+#### `/create-ui-spec` — UI Design Agent
+**输出**: `.blueprint/UI_Spec.md` + `.blueprint/mockup/design-system.html`
+**前置**: 当前生效 PRD + 已确认的 `.blueprint/mockup/index.html`
+
+从确认版 Mockup 中提炼结构化 UI 规范，沉淀设计 token、页面规范、组件规则、响应式要求、可访问性要求，并同步生成可浏览的设计系统预览文件 `design-system.html`。该命令同样建议配合 `.cursor/skills/ui-ux-pro-max/SKILL.md` 使用，用于补充规范术语、完善 UX/A11y 规则并检查设计系统完整度。
 
 ---
 
 #### `/create-tech-spec` — Dev Agent
 **输出**: `.blueprint/Tech_Spec.md`
-**前置**: `.blueprint/PRD_V{N}.md` + `.blueprint/UI_Spec.md` + `.blueprint/mockup/`（经设计师确认）
+**前置**: 当前生效 PRD + `.blueprint/UI_Spec.md` + `.blueprint/mockup/`（经设计师确认）
 
 生成可执行的技术方案，包含技术选型、系统架构、数据模型、API 设计、src 目录结构、前端页面/组件/数据三张对照表。需资深工程师 Review 后进入下一步。
 
@@ -110,7 +113,7 @@ Implement 阶段（编码）
 
 #### `/create-test-spec` — QA Agent
 **输出**: `.blueprint/Test_Spec.md`
-**前置**: `.blueprint/PRD_V{N}.md` + `.blueprint/UI_Spec.md` + `.blueprint/Tech_Spec.md`
+**前置**: 当前生效 PRD + `.blueprint/UI_Spec.md` + `.blueprint/Tech_Spec.md`
 
 ⚠️ **在开发之前运行**，不是开发之后。将需求与技术方案转化为可执行测试用例（功能/UI/API/性能/安全/A11y），生成 Release Gate 通过标准，作为 Exe Agent 编码时的验收边界。需测试工程师 Review 后进入下一步。
 
@@ -142,7 +145,7 @@ Implement 阶段（编码）
 ---
 
 #### `/review` — Review Agent
-**前置**: `.blueprint/Tech_Spec.md` + `.blueprint/UI_Spec.md` + `.blueprint/PRD_V{N}.md`
+**前置**: `.blueprint/Tech_Spec.md` + `.blueprint/UI_Spec.md` + 当前生效 PRD
 
 **双维度审查**：
 1. **漂移检测**：对照 Tech Spec/UI Spec/PRD 检查实现是否偏离规格，输出三张对照表
@@ -178,6 +181,7 @@ Implement 阶段（编码）
 
 - `.blueprint/CONTEXT.md` 是 AI 的入口，每次运行命令前先读它，完成后更新状态
 - 每次修改 PRD 时必须在迭代历史里记录原因，防止 AI 走回头路
+- 设计工作流以确认版 Mockup 为视觉真相来源，再由 `/create-ui-spec` 进行结构化沉淀
 - `/verify` 是最便宜的发现问题时机，不要跳过
 - `/execute` 的 Mission Briefing 不可跳过，这是防止代码漂移的核心机制
 - Test Spec 在 Tech Spec 之后、开发之前生成，让验收标准成为编码边界而不是事后检验
