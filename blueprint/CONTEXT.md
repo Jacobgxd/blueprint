@@ -17,10 +17,11 @@
 
 | 文档 | 文件路径 | 当前版本 | 状态 | 最后更新 | 负责人 |
 |-----|---------|---------|------|---------|------|
-| PRD | `.blueprint/PRD_V1.md` | 1.0 | ⚪ 待生成 | - | - |
-| UI Spec | `.blueprint/UI_Spec.md` | 1.0 | ⚪ 待生成 | - | - |
+| PRD | `.blueprint/PRD.md` / `.blueprint/PRD_V1.md` | 1.0 | ⚪ 待生成 | - | - |
 | Mockup | `.blueprint/mockup/` | - | ⚪ 待生成 | - | - |
 | Mockup Review | `reports/mockup-reviews/LATEST.md` | - | ⚪ 待生成 | - | - |
+| UI Spec | `.blueprint/UI_Spec.md` | 1.0 | ⚪ 待生成 | - | - |
+| Design System Preview | `.blueprint/mockup/design-system.html` | 1.0 | ⚪ 待生成 | - | - |
 | Tech Spec | `.blueprint/Tech_Spec.md` | 1.0 | ⚪ 待生成 | - | - |
 | Test Spec | `.blueprint/Test_Spec.md` | 1.0 | ⚪ 待生成 | - | - |
 | Global Verify | `reports/verify/LATEST.md` | - | ⚪ 待运行 | - | - |
@@ -33,11 +34,11 @@
 
 ## AI 实现代码时，必读文件（按顺序）
 
-1. **`.blueprint/PRD_V1.md`** — 读"📌 当前需求全貌"部分
+1. **当前生效 PRD**（如 `.blueprint/PRD.md` 或 `.blueprint/PRD_V1.md`）— 读"📌 当前需求全貌"部分
 2. **`.blueprint/AGENT_RUNTIME_PROTOCOL_V1.md`** — 统一 Runtime 协议、相位语义与结构化 `runtime` 契约
-3. **`.blueprint/Tech_Spec.md`** — 架构、数据模型、API 设计、src 结构
-4. **`.blueprint/UI_Spec.md`** — UI 规范
-5. **`.blueprint/mockup/`** — 视觉基准（读 src/ 下的代码，忽略 node_modules/）
+3. **`.blueprint/mockup/`** — 视觉基准（优先读 `index.html` 与 `design-system.html`）
+4. **`.blueprint/UI_Spec.md`** — UI 规范（由确认版 Mockup 提炼）
+5. **`.blueprint/Tech_Spec.md`** — 架构、数据模型、API 设计、src 结构
 6. **`.blueprint/Test_Spec.md`** — 验收标准（编码时的完成边界）
 
 ---
@@ -46,10 +47,10 @@
 
 | 步骤 | 命令 | 状态 | 完成时间 | 备注 |
 |-----|-----|------|---------|------|
-| 1. PM Agent | `/create-prd` | ⚪ | - | - |
-| 2. UI Design Agent | `/create-ui-spec` | ⚪ | - | - |
-| 3. Mockup Agent | `/create-mockup` | ⚪ | - | - |
-| 3a. Mockup Review + 人工确认 | `/review-mockup` | ⚪ | - | 迭代次数：0 |
+| 1. PM Agent（如需） | `/create-prd` | ⚪ | - | 若已有 PRD 可跳过 |
+| 2. Mockup Agent | `/create-mockup` | ⚪ | - | 基于 PRD 直接生成 |
+| 2a. Mockup Review + 人工确认 | `/review-mockup` | ⚪ | - | 迭代次数：0 |
+| 3. UI Design Agent | `/create-ui-spec` | ⚪ | - | 同时生成 `design-system.html` |
 | 4. Dev Agent | `/create-tech-spec` | ⚪ | - | - |
 | 5. QA Agent | `/create-test-spec` | ⚪ | - | - |
 | 6. Global Verifier | `/verify` | ⚪ | - | - |

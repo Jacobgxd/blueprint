@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuvante Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #F0F2F5;
+      --surface:      #FFFFFF;
+      --border:       #E4E7EE;
+      --teal:         #0BBFB2;
+      --teal-light:   #E6FAF8;
+      --teal-dark:    #089C91;
+      --amber:        #F59E0B;
+      --amber-light:  #FEF3C7;
+      --red:          #EF4444;
+      --red-light:    #FEE2E2;
+      --green:        #10B981;
+      --green-light:  #D1FAE5;
+      --blue:         #3B82F6;
+      --blue-light:   #DBEAFE;
+      --purple:       #8B5CF6;
+      --purple-light: #EDE9FE;
+      --text-primary:   #111827;
+      --text-secondary: #6B7280;
+      --text-muted:     #9CA3AF;
+      --shadow-sm:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:  0 4px 12px rgba(0,0,0,.08);
+      --radius-sm:  8px;
+      --radius-md:  12px;
+      --radius-lg:  16px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Page Shell ── */
+    .ds-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 48px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .ds-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ds-logo-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--teal);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ds-logo-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .ds-logo-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+      font-weight: 500;
+    }
+    .ds-version {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--teal-dark);
+      background: var(--teal-light);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .ds-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 48px;
+    }
+
+    /* ── Section ── */
+    .ds-section {
+      margin-bottom: 56px;
+    }
+    .ds-section-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ds-section-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 22px;
+      background: var(--teal);
+      border-radius: 2px;
+    }
+    .ds-section-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    .ds-subsection {
+      margin-bottom: 32px;
+    }
+    .ds-subsection-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+    .card-body { padding: 20px 24px; }
+
+    /* ── Grid ── */
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .grid-auto { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+
+    /* ── Color Swatches ── */
+    .color-group { margin-bottom: 8px; }
+    .color-group-name {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 8px;
+    }
+    .swatch-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+    .swatch {
+      width: 80px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .swatch-color { height: 56px; }
+    .swatch-info {
+      padding: 6px 8px;
+      background: var(--surface);
+    }
+    .swatch-name {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+    }
+    .swatch-hex {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+    }
+    .swatch-token {
+      font-size: 9px;
+      color: var(--teal-dark);
+      font-family: 'Fira Code', monospace;
+      margin-top: 2px;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── Typography Demo ── */
+    .type-row {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .type-row:last-child { border-bottom: none; }
+    .type-meta {
+      width: 180px;
+      flex-shrink: 0;
+    }
+    .type-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .type-spec {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-family: 'Fira Code', monospace;
+    }
+    .type-sample { flex: 1; }
+
+    /* ── Spacing Demo ── */
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .spacing-row:last-child { border-bottom: none; }
+    .spacing-label {
+      width: 80px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-family: 'Fira Code', monospace;
+    }
+    .spacing-bar-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .spacing-bar {
+      height: 16px;
+      background: var(--teal-light);
+      border: 1px solid var(--teal);
+      border-radius: 3px;
+    }
+    .spacing-val {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+    }
+    .spacing-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      width: 200px;
+    }
+
+    /* ── Radius Demo ── */
+    .radius-grid { display: flex; gap: 16px; flex-wrap: wrap; }
+    .radius-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .radius-box {
+      width: 80px;
+      height: 56px;
+      background: var(--teal-light);
+      border: 2px solid var(--teal);
+    }
+    .radius-info {
+      text-align: center;
+    }
+    .radius-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .radius-val {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* ── Shadow Demo ── */
+    .shadow-grid { display: flex; gap: 24px; flex-wrap: wrap; }
+    .shadow-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .shadow-box {
+      width: 120px;
+      height: 80px;
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .shadow-info { text-align: center; }
+    .shadow-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+    .shadow-val { font-size: 10px; color: var(--text-muted); font-family: 'Fira Code', monospace; max-width: 160px; }
+
+    /* ── Button Demo ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .btn-primary  { background: var(--teal);  color: #fff; }
+    .btn-primary:hover  { background: var(--teal-dark); }
+    .btn-secondary{ background: var(--bg); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-secondary:hover{ background: var(--border); }
+    .btn-danger   { background: var(--red-light); color: var(--red); border: 1px solid #FCA5A5; }
+    .btn-danger:hover   { background: #FECACA; }
+    .btn-ghost    { background: transparent; color: var(--text-secondary); border: 1px solid transparent; }
+    .btn-ghost:hover    { background: var(--bg); color: var(--text-primary); }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    .btn-demo-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .btn-demo-row:last-child { border-bottom: none; }
+    .btn-demo-label {
+      width: 120px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    /* ── Badge Demo ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+    .badge-teal    { background: var(--teal-light);   color: var(--teal-dark); }
+    .badge-green   { background: var(--green-light);  color: #065F46; }
+    .badge-amber   { background: var(--amber-light);  color: #92400E; }
+    .badge-red     { background: var(--red-light);    color: #991B1B; }
+    .badge-blue    { background: var(--blue-light);   color: #1E40AF; }
+    .badge-purple  { background: var(--purple-light); color: #5B21B6; }
+    .badge-gray    { background: #F3F4F6;              color: #374151; }
+    .badge-dot::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      margin-right: 5px;
+      display: inline-block;
+    }
+
+    /* ── Form Elements ── */
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .form-control {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .15s;
+      font-family: inherit;
+    }
+    .form-control:focus { border-color: var(--teal); }
+    .form-control::placeholder { color: var(--text-muted); }
+
+    /* ── Table Demo ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 11px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAFA; cursor: pointer; }
+    .id-code { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--teal-dark); }
+
+    /* ── Timeline Demo ── */
+    .timeline { display: flex; flex-direction: column; }
+    .tl-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding-bottom: 20px;
+      position: relative;
+    }
+    .tl-step:last-child { padding-bottom: 0; }
+    .tl-dot-wrap { display: flex; flex-direction: column; align-items: center; }
+    .tl-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+    }
+    .tl-line { width: 2px; flex: 1; background: var(--border); min-height: 24px; margin-top: 4px; }
+    .tl-step.done .tl-dot    { background: var(--green-light); color: var(--green); }
+    .tl-step.active .tl-dot  { background: var(--teal-light);  color: var(--teal); box-shadow: 0 0 0 4px var(--teal-light); }
+    .tl-step.pending .tl-dot { background: var(--bg); color: var(--text-muted); border: 2px solid var(--border); }
+    .tl-step.failed .tl-dot  { background: var(--red-light); color: var(--red); }
+    .tl-content { padding-top: 4px; }
+    .tl-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .tl-desc  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .tl-time  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Alert Demo ── */
+    .alert {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .alert-warning { background: var(--amber-light); color: #92400E; border: 1px solid #FCD34D; }
+    .alert-error   { background: var(--red-light);   color: #991B1B; border: 1px solid #FCA5A5; }
+    .alert-info    { background: var(--blue-light);  color: #1E40AF; border: 1px solid #93C5FD; }
+
+    /* ── Stat Card Demo ── */
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 18px 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .stat-label  { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-bottom: 8px; }
+    .stat-value  { font-size: 28px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+    .stat-sub    { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+    .stat-delta  { font-size: 11px; font-weight: 600; margin-top: 5px; }
+    .delta-up    { color: var(--green); }
+    .delta-down  { color: var(--red); }
+    .stat-icon   {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; }
+    .tab {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      background: transparent;
+    }
+    .tab:hover { background: var(--bg); }
+    .tab.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+    /* ── Sidebar Mini Demo ── */
+    .sidebar-demo {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      width: 220px;
+      overflow: hidden;
+    }
+    .sidebar-demo-logo {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon { width: 28px; height: 28px; background: var(--teal); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+    .logo-name { font-weight: 700; font-size: 14px; }
+    .sidebar-demo-role {
+      margin: 10px 12px 4px;
+      padding: 6px 10px;
+      background: var(--teal-light);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--teal-dark);
+      font-weight: 600;
+    }
+    .nav-section { padding: 12px 14px 4px; font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: .8px; text-transform: uppercase; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: all .15s;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+    .nav-item.active { background: var(--teal-light); color: var(--teal-dark); border-left-color: var(--teal); }
+    .nav-icon { width: 15px; height: 15px; }
+
+    /* ── Code Block ── */
+    .code-block {
+      background: #1E293B;
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      font-family: 'Fira Code', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      color: #94A3B8;
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+    .code-block .kw  { color: #7DD3FC; }
+    .code-block .str { color: #86EFAC; }
+    .code-block .cmt { color: #475569; }
+    .code-block .num { color: #FCA5A5; }
+
+    /* ── Section Nav ── */
+    .ds-nav {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    .ds-nav-item {
+      padding: 6px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all .15s;
+    }
+    .ds-nav-item:hover { background: var(--teal-light); color: var(--teal-dark); border-color: var(--teal-light); }
+
+    /* ── Divider ── */
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    /* ── Misc util ── */
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .mt-1 { margin-top: 4px; }
+    .mt-2 { margin-top: 8px; }
+    .mt-3 { margin-top: 12px; }
+    .text-muted { color: var(--text-muted); }
+    .text-sm { font-size: 12px; }
+    .font-mono { font-family: 'Fira Code', monospace; }
+
+    /* ── Interaction States Demo ── */
+    .state-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .state-row:last-child { border-bottom: none; }
+    .state-label {
+      width: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .btn-disabled {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: not-allowed;
+      opacity: .45;
+      background: var(--teal);
+      color: #fff;
+      border: none;
+    }
+    .input-error .form-control {
+      border-color: var(--red);
+    }
+    .input-error-msg {
+      font-size: 11px;
+      color: var(--red);
+      margin-top: 3px;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    .pulse { animation: pulse 2s infinite; }
+
+    @media (max-width: 768px) {
+      .ds-container { padding: 24px 20px; }
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="ds-header">
+  <div class="ds-logo">
+    <div class="ds-logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+    </div>
+    <div>
+      <div class="ds-logo-text">Nuvante</div>
+      <div class="ds-logo-sub">Design System</div>
+    </div>
+  </div>
+  <span class="ds-version">v0.2 · 2026-04-23</span>
+</header>
+
+<div class="ds-container">
+
+  <!-- Section Nav -->
+  <nav class="ds-nav">
+    <a class="ds-nav-item" href="#colors">Colors</a>
+    <a class="ds-nav-item" href="#typography">Typography</a>
+    <a class="ds-nav-item" href="#spacing">Spacing</a>
+    <a class="ds-nav-item" href="#radius">Radius</a>
+    <a class="ds-nav-item" href="#shadows">Shadows</a>
+    <a class="ds-nav-item" href="#buttons">Buttons</a>
+    <a class="ds-nav-item" href="#badges">Badges</a>
+    <a class="ds-nav-item" href="#forms">Forms</a>
+    <a class="ds-nav-item" href="#table">Table</a>
+    <a class="ds-nav-item" href="#cards">Cards</a>
+    <a class="ds-nav-item" href="#timeline">Timeline</a>
+    <a class="ds-nav-item" href="#alerts">Alerts</a>
+    <a class="ds-nav-item" href="#navigation">Navigation</a>
+    <a class="ds-nav-item" href="#states">States</a>
+  </nav>
+
+  <!-- ═══════════════════════════════════
+       1. COLORS
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="colors">
+    <h2 class="ds-section-title">Colors</h2>
+    <p class="ds-section-desc">全站色彩基于 CSS 变量定义。主色为 Teal，配合语义状态色和三层灰度文字系统。</p>
+
+    <div class="card">
+      <div class="card-body">
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">背景层</div>
+          <div class="swatch-grid">
+            <div class="swatch">
+              <div class="swatch-color" style="background:#F0F2F5;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">BG</span>
+                <span class="swatch-hex">#F0F2F5</span>
+                <span class="swatch-token">--bg</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#FFFFFF; border-bottom:1px solid #E4E7EE;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Surface</span>
+                <span class="swatch-hex">#FFFFFF</span>
+                <span class="swatch-token">--surface</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#E4E7EE;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Border</span>
+                <span class="swatch-hex">#E4E7EE</span>
+                <span class="swatch-token">--border</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">品牌主色 · Teal</div>
+          <div class="swatch-grid">
+            <div class="swatch">
+              <div class="swatch-color" style="background:#0BBFB2;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Teal</span>
+                <span class="swatch-hex">#0BBFB2</span>
+                <span class="swatch-token">--teal</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#089C91;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Teal Dark</span>
+                <span class="swatch-hex">#089C91</span>
+                <span class="swatch-token">--teal-dark</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#E6FAF8;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Teal Light</span>
+                <span class="swatch-hex">#E6FAF8</span>
+                <span class="swatch-token">--teal-light</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">语义状态色</div>
+          <div class="swatch-grid">
+            <div class="swatch">
+              <div class="swatch-color" style="background:#10B981;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Green</span>
+                <span class="swatch-hex">#10B981</span>
+                <span class="swatch-token">--green</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#D1FAE5;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Green Light</span>
+                <span class="swatch-hex">#D1FAE5</span>
+                <span class="swatch-token">--green-light</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#F59E0B;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Amber</span>
+                <span class="swatch-hex">#F59E0B</span>
+                <span class="swatch-token">--amber</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#FEF3C7;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Amber Light</span>
+                <span class="swatch-hex">#FEF3C7</span>
+                <span class="swatch-token">--amber-light</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#EF4444;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Red</span>
+                <span class="swatch-hex">#EF4444</span>
+                <span class="swatch-token">--red</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#FEE2E2;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Red Light</span>
+                <span class="swatch-hex">#FEE2E2</span>
+                <span class="swatch-token">--red-light</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#3B82F6;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Blue</span>
+                <span class="swatch-hex">#3B82F6</span>
+                <span class="swatch-token">--blue</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#DBEAFE;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Blue Light</span>
+                <span class="swatch-hex">#DBEAFE</span>
+                <span class="swatch-token">--blue-light</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#8B5CF6;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Purple</span>
+                <span class="swatch-hex">#8B5CF6</span>
+                <span class="swatch-token">--purple</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#EDE9FE;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Purple Light</span>
+                <span class="swatch-hex">#EDE9FE</span>
+                <span class="swatch-token">--purple-light</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ds-subsection" style="margin-bottom:0">
+          <div class="ds-subsection-title">文字层级</div>
+          <div class="swatch-grid">
+            <div class="swatch">
+              <div class="swatch-color" style="background:#111827;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Primary</span>
+                <span class="swatch-hex">#111827</span>
+                <span class="swatch-token">--text-primary</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#6B7280;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Secondary</span>
+                <span class="swatch-hex">#6B7280</span>
+                <span class="swatch-token">--text-secondary</span>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#9CA3AF;"></div>
+              <div class="swatch-info">
+                <span class="swatch-name">Muted</span>
+                <span class="swatch-hex">#9CA3AF</span>
+                <span class="swatch-token">--text-muted</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       2. TYPOGRAPHY
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="typography">
+    <h2 class="ds-section-title">Typography</h2>
+    <p class="ds-section-desc">主字体 Inter（UI 文字），辅助字体 Fira Code（ID / 代码类字段）。</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Page Title</div>
+            <div class="type-spec">16px / 700 / primary</div>
+          </div>
+          <div class="type-sample" style="font-size:16px;font-weight:700;color:var(--text-primary);">Member Dashboard</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Card Title</div>
+            <div class="type-spec">14px / 700 / primary</div>
+          </div>
+          <div class="type-sample" style="font-size:14px;font-weight:700;color:var(--text-primary);">Recent Transactions</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Stat Value</div>
+            <div class="type-spec">28px / 700 / primary</div>
+          </div>
+          <div class="type-sample" style="font-size:28px;font-weight:700;color:var(--text-primary);line-height:1;">1,247,850</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Body</div>
+            <div class="type-spec">13px / 400 / primary</div>
+          </div>
+          <div class="type-sample" style="font-size:13px;font-weight:400;color:var(--text-primary);">The settlement was processed successfully within the cutoff window.</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Body Semibold</div>
+            <div class="type-spec">13px / 600 / primary</div>
+          </div>
+          <div class="type-sample" style="font-size:13px;font-weight:600;color:var(--text-primary);">USDC / USD — Mint Instruction</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Meta / Label</div>
+            <div class="type-spec">11px / 500 / muted</div>
+          </div>
+          <div class="type-sample" style="font-size:11px;font-weight:500;color:var(--text-muted);">Today at 14:32 · Batch #1091</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Section Header</div>
+            <div class="type-spec">10px / 600 / muted · uppercase</div>
+          </div>
+          <div class="type-sample" style="font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;">Pending Actions</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Table Header</div>
+            <div class="type-spec">11px / 600 / secondary · uppercase</div>
+          </div>
+          <div class="type-sample" style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;">Transaction ID</div>
+        </div>
+        <div class="type-row">
+          <div class="type-meta">
+            <div class="type-label">Form Label</div>
+            <div class="type-spec">11px / 600 / secondary · uppercase</div>
+          </div>
+          <div class="type-sample" style="font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.4px;">Amount (USDC)</div>
+        </div>
+        <div class="type-row" style="border-bottom:none;">
+          <div class="type-meta">
+            <div class="type-label">ID / Code</div>
+            <div class="type-spec">12px / Fira Code / teal-dark</div>
+          </div>
+          <div class="type-sample" style="font-size:12px;font-family:'Fira Code',monospace;color:var(--teal-dark);">TXN-2024-004821-MINT</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       3. SPACING
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="spacing">
+    <h2 class="ds-section-title">Spacing</h2>
+    <p class="ds-section-desc">以 4px 为基本单位，所有间距均为 4 的倍数。</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="spacing-row">
+          <div class="spacing-label">4px</div>
+          <div class="spacing-bar-wrap"><div class="spacing-bar" style="width:4px;"></div></div>
+          <div class="spacing-val">0.25rem</div>
+          <div class="spacing-desc">图标与文字间距 / 极小间距</div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-label">8px</div>
+          <div class="spacing-bar-wrap"><div class="spacing-bar" style="width:8px;"></div></div>
+          <div class="spacing-val">0.5rem</div>
+          <div class="spacing-desc">组件内小间距 / gap-2</div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-label">10px</div>
+          <div class="spacing-bar-wrap"><div class="spacing-bar" style="width:10px;"></div></div>
+          <div class="spacing-val">0.625rem</div>
+          <div class="spacing-desc">Nav Item 图标间距</div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-label">12px</div>
+          <div class="spacing-bar-wrap"><div class="spacing-bar" style="width:12px;"></div></div>
+          <div class="spacing-val">0.75rem</div>
+          <div class="spacing-desc">组件间小 Gap / gap-3</div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-label">16px</div>
+          <div class="spacing-bar-wrap"><div class="spacing-bar" style="width:16px;"></div></div>
+          <div class="spacing-val">1rem</div>
+          <div class="spacing-desc">卡片间 Gap / Card Body 内边距</div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-label">20px</div>
+          <div class="spacing-bar-wrap"><div class="spacing-bar" style="width:20px;"></div></div>
+          <div class="spacing-val">1.25rem</div>
+          <div class="spacing-desc">区块间距 / Card Horizontal Padding</div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-label">24px</div>
+          <div class="spacing-bar-wrap"><div class="spacing-bar" style="width:24px;"></div></div>
+          <div class="spacing-val">1.5rem</div>
+          <div class="spacing-desc">页面内容区四边内边距</div>
+        </div>
+        <div class="spacing-row" style="border-bottom:none;">
+          <div class="spacing-label">56px</div>
+          <div class="spacing-bar-wrap"><div class="spacing-bar" style="width:56px;"></div></div>
+          <div class="spacing-val">3.5rem</div>
+          <div class="spacing-desc">Topbar 高度</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       4. RADIUS
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="radius">
+    <h2 class="ds-section-title">Border Radius</h2>
+    <p class="ds-section-desc">三级圆角体系：小（按钮/输入）、中（卡片）、大（保留场景）。Pill 形（20px）用于 Badge 和 Tab。</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="radius-grid">
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:8px;"></div>
+            <div class="radius-info">
+              <div class="radius-name">Small</div>
+              <div class="radius-val">--radius-sm · 8px</div>
+              <div class="text-sm text-muted mt-1">按钮 / 输入框 / 图标按钮</div>
+            </div>
+          </div>
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:12px;"></div>
+            <div class="radius-info">
+              <div class="radius-name">Medium</div>
+              <div class="radius-val">--radius-md · 12px</div>
+              <div class="text-sm text-muted mt-1">卡片 / Stat Card</div>
+            </div>
+          </div>
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:16px;"></div>
+            <div class="radius-info">
+              <div class="radius-name">Large</div>
+              <div class="radius-val">--radius-lg · 16px</div>
+              <div class="text-sm text-muted mt-1">保留大圆角场景</div>
+            </div>
+          </div>
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:20px;"></div>
+            <div class="radius-info">
+              <div class="radius-name">Pill</div>
+              <div class="radius-val">20px</div>
+              <div class="text-sm text-muted mt-1">Badge / Tab</div>
+            </div>
+          </div>
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:10px;width:56px;height:56px;"></div>
+            <div class="radius-info">
+              <div class="radius-name">Icon</div>
+              <div class="radius-val">10px</div>
+              <div class="text-sm text-muted mt-1">Stat 图标 / 列表图标</div>
+            </div>
+          </div>
+          <div class="radius-item">
+            <div class="radius-box" style="border-radius:50%;width:48px;height:48px;"></div>
+            <div class="radius-info">
+              <div class="radius-name">Circle</div>
+              <div class="radius-val">50%</div>
+              <div class="text-sm text-muted mt-1">Avatar / Timeline Dot</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       5. SHADOWS
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="shadows">
+    <h2 class="ds-section-title">Shadows</h2>
+    <p class="ds-section-desc">两级阴影体系：小阴影用于普通卡片，大阴影用于浮层。整体保持克制，不使用装饰性深阴影。</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="shadow-grid">
+          <div class="shadow-item">
+            <div class="shadow-box" style="box-shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);">shadow-sm</div>
+            <div class="shadow-info">
+              <div class="shadow-name">Shadow SM</div>
+              <div class="shadow-val">0 1px 3px rgba(0,0,0,.08)</div>
+            </div>
+          </div>
+          <div class="shadow-item">
+            <div class="shadow-box" style="box-shadow:0 4px 12px rgba(0,0,0,.08);">shadow-md</div>
+            <div class="shadow-info">
+              <div class="shadow-name">Shadow MD</div>
+              <div class="shadow-val">0 4px 12px rgba(0,0,0,.08)</div>
+            </div>
+          </div>
+          <div class="shadow-item">
+            <div class="shadow-box" style="box-shadow:-8px 0 32px rgba(0,0,0,.12);">Drawer</div>
+            <div class="shadow-info">
+              <div class="shadow-name">Drawer Shadow</div>
+              <div class="shadow-val">-8px 0 32px rgba(0,0,0,.12)</div>
+            </div>
+          </div>
+          <div class="shadow-item">
+            <div class="shadow-box" style="box-shadow:0 0 0 4px #E6FAF8;border:2px solid var(--teal);">Ring</div>
+            <div class="shadow-info">
+              <div class="shadow-name">Active Ring</div>
+              <div class="shadow-val">0 0 0 4px --teal-light</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       6. BUTTONS
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="buttons">
+    <h2 class="ds-section-title">Buttons</h2>
+    <p class="ds-section-desc">四种语义变体 + 尺寸变体。全部使用 cursor-pointer，过渡 150ms。</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="btn-demo-row">
+          <div class="btn-demo-label">Primary</div>
+          <button class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Instruction
+          </button>
+          <span class="text-sm text-muted">主操作 / 确认</span>
+        </div>
+        <div class="btn-demo-row">
+          <div class="btn-demo-label">Secondary</div>
+          <button class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            Export
+          </button>
+          <span class="text-sm text-muted">次要操作 / 取消</span>
+        </div>
+        <div class="btn-demo-row">
+          <div class="btn-demo-label">Danger</div>
+          <button class="btn btn-danger">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            Cancel Instruction
+          </button>
+          <span class="text-sm text-muted">危险操作 / 不可逆</span>
+        </div>
+        <div class="btn-demo-row">
+          <div class="btn-demo-label">Ghost</div>
+          <button class="btn btn-ghost">View All</button>
+          <span class="text-sm text-muted">轻量操作 / 链接态</span>
+        </div>
+        <div class="btn-demo-row" style="border-bottom:none;">
+          <div class="btn-demo-label">Small</div>
+          <button class="btn btn-primary btn-sm">Approve</button>
+          <button class="btn btn-secondary btn-sm">Reject</button>
+          <button class="btn btn-danger btn-sm">Cancel</button>
+          <span class="text-sm text-muted">紧凑场景（表格行内、卡片操作区）</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       7. BADGES
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="badges">
+    <h2 class="ds-section-title">Badges</h2>
+    <p class="ds-section-desc">7 种语义色 Badge，均为 Pill 形（border-radius: 20px）。支持圆点前缀变体 `.badge-dot`。</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="ds-subsection">
+          <div class="ds-subsection-title">标准 Badge</div>
+          <div class="grid-auto">
+            <span class="badge badge-teal">Mint</span>
+            <span class="badge badge-green">Settled</span>
+            <span class="badge badge-amber">Pending</span>
+            <span class="badge badge-red">Failed</span>
+            <span class="badge badge-blue">Processing</span>
+            <span class="badge badge-purple">Redeem</span>
+            <span class="badge badge-gray">Cancelled</span>
+          </div>
+        </div>
+        <div class="ds-subsection" style="margin-bottom:0;">
+          <div class="ds-subsection-title">圆点变体（可扫描状态）</div>
+          <div class="grid-auto">
+            <span class="badge badge-teal badge-dot">Active</span>
+            <span class="badge badge-green badge-dot">Completed</span>
+            <span class="badge badge-amber badge-dot">In Progress</span>
+            <span class="badge badge-red badge-dot">Error</span>
+            <span class="badge badge-gray badge-dot">Paused</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       8. FORMS
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="forms">
+    <h2 class="ds-section-title">Forms</h2>
+    <p class="ds-section-desc">表单控件统一风格：浅灰边框，Focus 变品牌 Teal，Label 大写小字。</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-body">
+          <div class="ds-subsection-title" style="margin-bottom:16px;">Input</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="form-group">
+              <label class="form-label">Amount (USDC)</label>
+              <input class="form-control" type="text" placeholder="0.00" value="">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount (Focus)</label>
+              <input class="form-control" type="text" placeholder="Focus 状态" style="border-color:var(--teal);" value="1,000,000">
+            </div>
+            <div class="form-group input-error">
+              <label class="form-label">Beneficiary Account</label>
+              <input class="form-control" type="text" placeholder="请输入账户号" value="invalid-acc">
+              <span class="input-error-msg">Invalid account format</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="ds-subsection-title" style="margin-bottom:16px;">Select & Textarea</div>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div class="form-group">
+              <label class="form-label">Instruction Type</label>
+              <select class="form-control">
+                <option>Mint</option>
+                <option>Redeem</option>
+                <option>Transfer</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Memo</label>
+              <textarea class="form-control" rows="3" placeholder="Optional memo..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       9. TABLE
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="table">
+    <h2 class="ds-section-title">Table</h2>
+    <p class="ds-section-desc">TH 大写 + 字间距 + 浅灰背景。ID 字段 Fira Code + Teal Dark。行 Hover 背景 #FAFAFA。</p>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Instruction ID</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Counterparty</th>
+              <th>Status</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="id-code">INS-20240423-0081</span></td>
+              <td><span class="badge badge-teal badge-dot">Mint</span></td>
+              <td style="font-weight:600;">1,000,000 USDC</td>
+              <td>FirstBank Corp</td>
+              <td><span class="badge badge-amber badge-dot">Pending</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">2024-04-23 09:14</td>
+            </tr>
+            <tr>
+              <td><span class="id-code">INS-20240422-0077</span></td>
+              <td><span class="badge badge-purple badge-dot">Redeem</span></td>
+              <td style="font-weight:600;">500,000 USDC</td>
+              <td>Metro Bank</td>
+              <td><span class="badge badge-green badge-dot">Settled</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">2024-04-22 16:45</td>
+            </tr>
+            <tr>
+              <td><span class="id-code">INS-20240421-0063</span></td>
+              <td><span class="badge badge-teal badge-dot">Mint</span></td>
+              <td style="font-weight:600;">2,500,000 USDC</td>
+              <td>Alliance Trust</td>
+              <td><span class="badge badge-red badge-dot">Failed</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">2024-04-21 11:30</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       10. CARDS
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="cards">
+    <h2 class="ds-section-title">Cards</h2>
+    <p class="ds-section-desc">Stat Card 为关键数据展示容器；Standard Card 为通用内容容器。</p>
+
+    <div class="ds-subsection">
+      <div class="ds-subsection-title">Stat Cards</div>
+      <div class="grid-4">
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Total Minted</div>
+            <div class="stat-value">12.4M</div>
+            <div class="stat-delta delta-up">↑ 8.3% vs last week</div>
+          </div>
+          <div class="stat-icon" style="background:var(--teal-light);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Settled Today</div>
+            <div class="stat-value">3,847</div>
+            <div class="stat-delta delta-up">↑ 12 new</div>
+          </div>
+          <div class="stat-icon" style="background:var(--green-light);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Pending Queue</div>
+            <div class="stat-value">142</div>
+            <div class="stat-sub">Awaiting settlement</div>
+          </div>
+          <div class="stat-icon" style="background:var(--amber-light);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div>
+            <div class="stat-label">Failed Today</div>
+            <div class="stat-value">7</div>
+            <div class="stat-delta delta-down">↑ 3 vs yesterday</div>
+          </div>
+          <div class="stat-icon" style="background:var(--red-light);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ds-subsection" style="margin-bottom:0;">
+      <div class="ds-subsection-title">Standard Card with Header</div>
+      <div class="card" style="max-width:480px;">
+        <div style="padding:16px 20px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <div style="font-size:14px;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            RTGS Accounts
+          </div>
+          <div class="tabs">
+            <button class="tab active">All</button>
+            <button class="tab">USD</button>
+            <button class="tab">EUR</button>
+          </div>
+        </div>
+        <div style="padding:16px 20px;font-size:13px;color:var(--text-secondary);">Card body content area — padding 16px 20px</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       11. TIMELINE
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="timeline">
+    <h2 class="ds-section-title">Timeline</h2>
+    <p class="ds-section-desc">用于交易流程步骤展示。四种节点状态：Done / Active / Pending / Failed。</p>
+
+    <div class="card" style="max-width:480px;">
+      <div class="card-body">
+        <div class="timeline">
+          <div class="tl-step done">
+            <div class="tl-dot-wrap">
+              <div class="tl-dot">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-title">Instruction Submitted</div>
+              <div class="tl-desc">Mint instruction accepted by platform</div>
+              <div class="tl-time">2024-04-23 09:14:02</div>
+            </div>
+          </div>
+          <div class="tl-step done">
+            <div class="tl-dot-wrap">
+              <div class="tl-dot">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-title">Issuer Approved</div>
+              <div class="tl-desc">Reserve confirmed · 1,000,000 USDC</div>
+              <div class="tl-time">2024-04-23 09:17:44</div>
+            </div>
+          </div>
+          <div class="tl-step active">
+            <div class="tl-dot-wrap">
+              <div class="tl-dot pulse">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="5"/></svg>
+              </div>
+              <div class="tl-line"></div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-title">RTGS Settlement</div>
+              <div class="tl-desc">Awaiting batch window close</div>
+              <div class="tl-time">In progress...</div>
+            </div>
+          </div>
+          <div class="tl-step pending">
+            <div class="tl-dot-wrap">
+              <div class="tl-dot">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/></svg>
+              </div>
+            </div>
+            <div class="tl-content">
+              <div class="tl-title">Token Minted</div>
+              <div class="tl-desc">Waiting for settlement confirmation</div>
+              <div class="tl-time">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       12. ALERTS
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="alerts">
+    <h2 class="ds-section-title">Alerts</h2>
+    <p class="ds-section-desc">三种语义 Alert Banner，用于全局系统状态提示。</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-warning">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <strong>System Paused</strong> — Settlement batch processing is temporarily suspended. Pending instructions will resume at 14:00 UTC.
+        </div>
+        <div class="alert alert-error">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          <strong>Connectivity Error</strong> — RTGS bridge connection lost. Contact support if this persists.
+        </div>
+        <div class="alert alert-info" style="margin-bottom:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Maintenance window scheduled for <strong>2024-04-25 02:00–04:00 UTC</strong>. Platform will be in read-only mode.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       13. NAVIGATION
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="navigation">
+    <h2 class="ds-section-title">Navigation</h2>
+    <p class="ds-section-desc">左侧固定 Sidebar（220px）+ 顶部粘性 Topbar（56px）。激活 Nav Item 有左侧 3px Teal 描边。</p>
+
+    <div class="grid-2">
+      <div>
+        <div class="ds-subsection-title" style="margin-bottom:12px;">Sidebar</div>
+        <div class="sidebar-demo">
+          <div class="sidebar-demo-logo">
+            <div class="logo-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div class="logo-name">Nuvante</div>
+              <div style="font-size:9px;color:var(--text-muted);letter-spacing:.4px;text-transform:uppercase;">Clearing Platform</div>
+            </div>
+          </div>
+          <div class="sidebar-demo-role">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:4px;"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0114 0v2"/></svg>
+            Member · FirstBank
+          </div>
+          <div class="nav-section">Main</div>
+          <div class="nav-item active">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Dashboard
+          </div>
+          <div class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Instruction
+          </div>
+          <div class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Transactions
+          </div>
+          <div class="nav-section">Account</div>
+          <div class="nav-item">
+            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0114 0v2"/></svg>
+            Profile
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="ds-subsection-title" style="margin-bottom:12px;">Topbar</div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm);">
+          <span style="font-size:15px;font-weight:700;color:var(--text-primary);">Member Dashboard</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 10px;width:180px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span style="font-size:12px;color:var(--text-muted);">Search...</span>
+            </div>
+            <div style="width:34px;height:34px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <span style="position:absolute;top:5px;right:5px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1px solid var(--surface);"></span>
+            </div>
+            <div style="width:34px;height:34px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 4.93a10 10 0 0 0 0 14.14A10 10 0 0 0 19.07 4.93z"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;">
+          <div class="ds-subsection-title" style="margin-bottom:12px;">Tabs</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="tabs">
+              <button class="tab active">All</button>
+              <button class="tab">Mint</button>
+              <button class="tab">Redeem</button>
+              <button class="tab">Pending</button>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);">Pill Tabs — 12px / 500 · border-radius 20px</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════
+       14. INTERACTION STATES
+  ═══════════════════════════════════ -->
+  <section class="ds-section" id="states">
+    <h2 class="ds-section-title">Interaction States</h2>
+    <p class="ds-section-desc">所有交互状态统一使用 150ms 过渡。</p>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="state-row">
+          <div class="state-label">Hover</div>
+          <button class="btn btn-primary" style="background:var(--teal-dark);">Hovered Button</button>
+          <span class="text-sm text-muted">background → --teal-dark</span>
+        </div>
+        <div class="state-row">
+          <div class="state-label">Focus</div>
+          <input class="form-control" style="border-color:var(--teal);width:220px;" value="Focused input" readonly>
+          <span class="text-sm text-muted">border-color → --teal</span>
+        </div>
+        <div class="state-row">
+          <div class="state-label">Disabled</div>
+          <button class="btn-disabled">Disabled Button</button>
+          <span class="text-sm text-muted">opacity: .45 · cursor: not-allowed</span>
+        </div>
+        <div class="state-row">
+          <div class="state-label">Error</div>
+          <div>
+            <input class="form-control" style="border-color:var(--red);width:220px;" value="Invalid value" readonly>
+            <div class="input-error-msg">This field is required</div>
+          </div>
+          <span class="text-sm text-muted">border-color → --red + error message</span>
+        </div>
+        <div class="state-row" style="border-bottom:none;">
+          <div class="state-label">Loading</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <svg class="pulse" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <span class="badge badge-teal badge-dot pulse">Processing...</span>
+          </div>
+          <span class="text-sm text-muted">pulse animation 2s infinite</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CSS Variables Code Block -->
+    <div style="margin-top:32px;">
+      <div class="ds-subsection-title">CSS Variables Reference</div>
+      <div class="code-block">
+<span class="cmt">/* Root variables — copy to project */</span>
+<span class="kw">:root</span> {
+  <span class="cmt">/* Background */</span>
+  <span class="kw">--bg</span>:           <span class="str">#F0F2F5</span>;
+  <span class="kw">--surface</span>:      <span class="str">#FFFFFF</span>;
+  <span class="kw">--border</span>:       <span class="str">#E4E7EE</span>;
+
+  <span class="cmt">/* Brand */</span>
+  <span class="kw">--teal</span>:         <span class="str">#0BBFB2</span>;
+  <span class="kw">--teal-light</span>:   <span class="str">#E6FAF8</span>;
+  <span class="kw">--teal-dark</span>:    <span class="str">#089C91</span>;
+
+  <span class="cmt">/* Semantic */</span>
+  <span class="kw">--green</span>:        <span class="str">#10B981</span>;  <span class="kw">--green-light</span>:  <span class="str">#D1FAE5</span>;
+  <span class="kw">--amber</span>:        <span class="str">#F59E0B</span>;  <span class="kw">--amber-light</span>:  <span class="str">#FEF3C7</span>;
+  <span class="kw">--red</span>:          <span class="str">#EF4444</span>;  <span class="kw">--red-light</span>:    <span class="str">#FEE2E2</span>;
+  <span class="kw">--blue</span>:         <span class="str">#3B82F6</span>;  <span class="kw">--blue-light</span>:   <span class="str">#DBEAFE</span>;
+  <span class="kw">--purple</span>:       <span class="str">#8B5CF6</span>;  <span class="kw">--purple-light</span>: <span class="str">#EDE9FE</span>;
+
+  <span class="cmt">/* Text */</span>
+  <span class="kw">--text-primary</span>:   <span class="str">#111827</span>;
+  <span class="kw">--text-secondary</span>: <span class="str">#6B7280</span>;
+  <span class="kw">--text-muted</span>:     <span class="str">#9CA3AF</span>;
+
+  <span class="cmt">/* Elevation */</span>
+  <span class="kw">--shadow-sm</span>:  <span class="str">0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05)</span>;
+  <span class="kw">--shadow-md</span>:  <span class="str">0 4px 12px rgba(0,0,0,.08)</span>;
+
+  <span class="cmt">/* Radius */</span>
+  <span class="kw">--radius-sm</span>:  <span class="num">8px</span>;
+  <span class="kw">--radius-md</span>:  <span class="num">12px</span>;
+  <span class="kw">--radius-lg</span>:  <span class="num">16px</span>;
+}
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

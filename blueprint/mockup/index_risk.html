@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPRI Monitor — Stablecoin Peg Risk Index</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #F0F2F5;
+      --surface:         #FFFFFF;
+      --border:          #E4E7EE;
+      --teal:            #0BBFB2;
+      --teal-light:      #E6FAF8;
+      --teal-dark:       #089C91;
+      --amber:           #F59E0B;
+      --amber-light:     #FEF3C7;
+      --red:             #EF4444;
+      --red-light:       #FEE2E2;
+      --green:           #10B981;
+      --green-light:     #D1FAE5;
+      --blue:            #3B82F6;
+      --blue-light:      #DBEAFE;
+      --purple:          #8B5CF6;
+      --purple-light:    #EDE9FE;
+      --orange:          #F97316;
+      --orange-light:    #FFEDD5;
+      /* Risk level semantic colors */
+      --risk-normal:        #10B981;
+      --risk-normal-light:  #D1FAE5;
+      --risk-normal-dark:   #065F46;
+      --risk-elevated:      #F59E0B;
+      --risk-elevated-light:#FEF3C7;
+      --risk-elevated-dark: #92400E;
+      --risk-high:          #F97316;
+      --risk-high-light:    #FFEDD5;
+      --risk-high-dark:     #7C2D12;
+      --risk-critical:      #EF4444;
+      --risk-critical-light:#FEE2E2;
+      --risk-critical-dark: #991B1B;
+      --risk-mover:         #8B5CF6;
+      --risk-mover-light:   #EDE9FE;
+      --risk-mover-dark:    #5B21B6;
+      --text-primary:    #111827;
+      --text-secondary:  #6B7280;
+      --text-muted:      #9CA3AF;
+      --shadow-sm:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:  0 4px 12px rgba(0,0,0,.08);
+      --radius-sm:  8px;
+      --radius-md:  12px;
+      --radius-lg:  16px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 220px; height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-mark { display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--teal);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-text { font-weight: 700; font-size: 15px; color: var(--text-primary); }
+    .logo-sub  { font-size: 10px; color: var(--text-muted); letter-spacing: .5px; text-transform: uppercase; margin-top: 1px; }
+    .sidebar-role {
+      margin: 12px 16px 0;
+      padding: 8px 10px;
+      background: var(--teal-light);
+      border-radius: var(--radius-sm);
+      font-size: 11px; color: var(--teal-dark); font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .sidebar-nav { padding: 8px 0; flex: 1; overflow-y: auto; }
+    .nav-section { padding: 16px 16px 4px; font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: .8px; text-transform: uppercase; }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 16px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all .15s;
+      font-size: 13px; font-weight: 500;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover { background: var(--bg); color: var(--text-primary); }
+    .nav-item.active { background: var(--teal-light); color: var(--teal-dark); border-left-color: var(--teal); }
+    .nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
+    .nav-badge {
+      margin-left: auto;
+      background: var(--red); color: #fff;
+      font-size: 10px; font-weight: 600;
+      padding: 1px 6px; border-radius: 10px; line-height: 1.6;
+    }
+    .nav-badge-amber {
+      margin-left: auto;
+      background: var(--amber); color: #fff;
+      font-size: 10px; font-weight: 600;
+      padding: 1px 6px; border-radius: 10px; line-height: 1.6;
+    }
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .user-info { display: flex; align-items: center; gap: 10px; }
+    .user-avatar {
+      width: 32px; height: 32px;
+      background: var(--teal); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 12px;
+    }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .user-role { font-size: 11px; color: var(--text-muted); }
+
+    /* ── Main Layout ── */
+    .main {
+      margin-left: 220px;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-title { font-size: 16px; font-weight: 700; }
+    .topbar-sub   { font-size: 12px; color: var(--text-muted); }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+    .refresh-time { font-size: 12px; color: var(--text-muted); }
+    .icon-btn {
+      width: 36px; height: 36px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s; color: var(--text-secondary);
+    }
+    .icon-btn:hover { background: var(--border); }
+    .notif-dot { position: relative; }
+    .notif-dot::after {
+      content: '';
+      position: absolute; top: 6px; right: 6px;
+      width: 7px; height: 7px;
+      background: var(--red); border-radius: 50%;
+      border: 1px solid var(--surface);
+    }
+    .content { padding: 24px; flex: 1; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+    }
+    .card-header {
+      padding: 16px 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-body { padding: 16px 20px; }
+
+    /* ── Stat / KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 18px 20px;
+      display: flex; align-items: flex-start; justify-content: space-between;
+    }
+    .kpi-label { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-bottom: 6px; }
+    .kpi-value { font-size: 28px; font-weight: 700; line-height: 1; }
+    .kpi-sub   { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+    .kpi-icon  {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Stablecoin Cards Grid ── */
+    .coin-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .coin-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 20px;
+      cursor: pointer;
+      transition: box-shadow .2s, border-color .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .coin-card:hover { box-shadow: var(--shadow-md); border-color: var(--teal); }
+    .coin-card.rapid-mover-card { border-top: 3px solid var(--risk-mover); }
+    .coin-card-top {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .coin-symbol {
+      font-size: 18px; font-weight: 700;
+      font-family: 'Fira Code', monospace;
+    }
+    .coin-score-wrap { text-align: right; }
+    .coin-score {
+      font-size: 32px; font-weight: 700; line-height: 1;
+    }
+    .coin-score-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+    .coin-risk-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .coin-risk-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: currentColor;
+    }
+    /* Dimension mini bars */
+    .dim-bars { margin-bottom: 14px; }
+    .dim-bar-row {
+      display: flex; align-items: center; gap: 6px;
+      margin-bottom: 5px;
+    }
+    .dim-bar-label {
+      font-size: 10px; font-weight: 600; color: var(--text-muted);
+      width: 22px; flex-shrink: 0;
+      text-transform: uppercase;
+    }
+    .dim-bar-track {
+      flex: 1; height: 5px; background: var(--bg);
+      border-radius: 3px; overflow: hidden;
+    }
+    .dim-bar-fill { height: 100%; border-radius: 3px; transition: width .3s; }
+    .dim-bar-val {
+      font-size: 10px; font-weight: 600; color: var(--text-secondary);
+      width: 22px; text-align: right; flex-shrink: 0;
+    }
+    /* Pill badges */
+    .pill-row { display: flex; gap: 5px; flex-wrap: wrap; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 8px; border-radius: 12px;
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .3px;
+    }
+    .pill-mover  { background: var(--risk-mover-light); color: var(--risk-mover-dark); }
+    .pill-stale  { background: var(--amber-light); color: var(--risk-elevated-dark); }
+    .pill-pending{ background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+    .pill-review { background: var(--blue-light); color: #1E40AF; }
+
+    .view-detail-btn {
+      width: 100%;
+      margin-top: 14px;
+      padding: 7px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      cursor: pointer; text-align: center; transition: all .15s;
+    }
+    .view-detail-btn:hover { background: var(--teal-light); color: var(--teal-dark); border-color: var(--teal); }
+
+    /* Pending coin card */
+    .coin-card-pending {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 220px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    .coin-card-pending svg { margin-bottom: 8px; opacity: .4; }
+    .coin-card-pending .pend-title { font-weight: 600; font-size: 14px; }
+
+    /* ── Bottom grid: trend + alerts ── */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.8fr 1fr;
+      gap: 16px;
+    }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .3px; text-transform: uppercase;
+    }
+    .badge-teal   { background: var(--teal-light); color: var(--teal-dark); }
+    .badge-green  { background: var(--risk-normal-light); color: var(--risk-normal-dark); }
+    .badge-amber  { background: var(--risk-elevated-light); color: var(--risk-elevated-dark); }
+    .badge-orange { background: var(--risk-high-light); color: var(--risk-high-dark); }
+    .badge-red    { background: var(--risk-critical-light); color: var(--risk-critical-dark); }
+    .badge-purple { background: var(--risk-mover-light); color: var(--risk-mover-dark); }
+    .badge-gray   { background: #F3F4F6; color: #374151; }
+    .badge-dot::before {
+      content: ''; width: 6px; height: 6px;
+      border-radius: 50%; background: currentColor;
+      margin-right: 5px; display: inline-block;
+    }
+
+    /* ── Alert Feed ── */
+    .alert-list { display: flex; flex-direction: column; }
+    .alert-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .1s;
+    }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-item:hover { background: var(--bg); margin: 0 -20px; padding: 10px 20px; border-radius: 4px; }
+    .alert-indicator {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 5px; flex-shrink: 0;
+    }
+    .alert-body { flex: 1; min-width: 0; }
+    .alert-title { font-size: 12px; font-weight: 600; }
+    .alert-meta  { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .alert-time  { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; }
+    .tab {
+      padding: 5px 14px; border-radius: 20px;
+      font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all .15s;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+    }
+    .tab:hover { background: var(--bg); }
+    .tab.active { background: var(--teal); color: #fff; border-color: var(--teal); }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 600;
+      cursor: pointer; border: none; outline: none;
+      transition: all .15s; text-decoration: none;
+    }
+    .btn-primary   { background: var(--teal); color: #fff; }
+    .btn-primary:hover { background: var(--teal-dark); }
+    .btn-secondary { background: var(--bg); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-danger    { background: var(--red-light); color: var(--risk-critical-dark); border: 1px solid #FCA5A5; }
+    .btn-danger:hover { background: #FCA5A5; }
+    .btn-sm        { padding: 5px 12px; font-size: 12px; }
+
+    /* ── Select ── */
+    .select-wrap {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 6px 10px;
+      font-size: 12px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer;
+    }
+    select {
+      border: none; background: none; outline: none;
+      font-size: 12px; color: var(--text-primary); font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* ── Page visibility ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ══════════════════════════════════════════
+       DETAIL PAGE styles
+    ══════════════════════════════════════════ */
+    .detail-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .detail-hero-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .detail-coin-name { font-size: 22px; font-weight: 700; font-family: 'Fira Code', monospace; }
+    .detail-updated   { font-size: 12px; color: var(--text-muted); }
+    .detail-hero-metrics {
+      display: flex; align-items: center; gap: 24px;
+    }
+    .detail-score-block { text-align: center; }
+    .detail-score-num   { font-size: 48px; font-weight: 700; line-height: 1; font-family: 'Fira Code', monospace; }
+    .detail-score-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+    .detail-divider { width: 1px; height: 48px; background: var(--border); }
+    .detail-badge-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .detail-3col { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .detail-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .span-2 { grid-column: 1 / -1; }
+
+    /* Dimension score cards */
+    .dim-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .dim-card {
+      text-align: center; padding: 16px 12px;
+      background: var(--bg); border-radius: var(--radius-sm);
+    }
+    .dim-card-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .dim-card-name  { font-size: 10px; color: var(--text-muted); margin-bottom: 10px; }
+    .dim-card-score { font-size: 28px; font-weight: 700; line-height: 1; font-family: 'Fira Code', monospace; }
+    .dim-card-gauge {
+      height: 4px; background: var(--border); border-radius: 2px;
+      margin-top: 10px; overflow: hidden;
+    }
+    .dim-card-gauge-fill { height: 100%; border-radius: 2px; transition: width .4s; }
+
+    /* Top drivers */
+    .driver-list { display: flex; flex-direction: column; gap: 10px; }
+    .driver-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; background: var(--bg); border-radius: var(--radius-sm);
+    }
+    .driver-id {
+      font-family: 'Fira Code', monospace; font-size: 12px;
+      font-weight: 600; color: var(--teal-dark);
+      width: 42px; flex-shrink: 0;
+    }
+    .driver-info { flex: 1; min-width: 0; }
+    .driver-name  { font-size: 12px; font-weight: 600; }
+    .driver-desc  { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+    .driver-score-wrap { text-align: right; flex-shrink: 0; }
+    .driver-score { font-size: 20px; font-weight: 700; line-height: 1; font-family: 'Fira Code', monospace; }
+    .driver-score-label { font-size: 10px; color: var(--text-muted); }
+    .driver-rank-badge {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* Variable drilldown table */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: 10px 16px;
+      text-align: left; font-size: 11px; font-weight: 600;
+      color: var(--text-secondary); text-transform: uppercase; letter-spacing: .5px;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 11px 16px; font-size: 13px;
+      border-bottom: 1px solid var(--border); vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #FAFAFA; cursor: pointer; }
+    .mono { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--teal-dark); }
+    .expand-row { background: #FAFBFC !important; }
+    .expand-content {
+      padding: 12px 16px; background: var(--bg);
+      border-radius: var(--radius-sm); font-size: 12px;
+      color: var(--text-secondary); line-height: 1.7;
+    }
+    .expand-content strong { color: var(--text-primary); }
+    td.expand-td { padding: 8px 16px 16px; }
+
+    /* Alert Timeline */
+    .timeline { display: flex; flex-direction: column; }
+    .timeline-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-dot-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      flex-shrink: 0; margin-top: 4px;
+    }
+    .timeline-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .timeline-line { width: 1px; background: var(--border); flex: 1; min-height: 16px; margin-top: 4px; }
+    .timeline-content { flex: 1; }
+    .timeline-title { font-size: 12px; font-weight: 600; }
+    .timeline-desc  { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .timeline-time  { font-size: 11px; color: var(--text-muted); flex-shrink: 0; margin-top: 4px; }
+
+    /* Reserve review status mini */
+    .review-status-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .review-status-item:last-child { border-bottom: none; }
+    .review-field-id { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--teal-dark); font-weight: 500; }
+    .review-field-val{ font-size: 13px; font-weight: 600; }
+    .review-reviewer { font-size: 11px; color: var(--text-muted); }
+
+    /* ══════════════════════════════════════════
+       RESERVE REVIEW PAGE
+    ══════════════════════════════════════════ */
+    .review-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .review-queue-list { display: flex; flex-direction: column; }
+    .review-queue-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .1s;
+    }
+    .review-queue-item:hover  { background: var(--bg); }
+    .review-queue-item.active { background: var(--teal-light); }
+    .review-queue-item:last-child { border-bottom: none; }
+    .rq-coin  { font-size: 13px; font-weight: 700; font-family: 'Fira Code', monospace; }
+    .rq-source{ font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+    .rq-date  { font-size: 10px; color: var(--text-muted); }
+    .rq-right { margin-left: auto; text-align: right; }
+
+    .review-detail-section { margin-bottom: 20px; }
+    .review-section-title {
+      font-size: 12px; font-weight: 700; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: .5px;
+      margin-bottom: 10px; padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .confidence-bar-wrap { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+    .confidence-bar {
+      flex: 1; height: 8px; background: var(--bg);
+      border-radius: 4px; overflow: hidden;
+    }
+    .confidence-fill { height: 100%; border-radius: 4px; }
+    .confidence-label { font-size: 12px; font-weight: 600; width: 40px; }
+    .field-input-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px; background: var(--bg); border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+    }
+    .field-id { font-family: 'Fira Code', monospace; font-size: 12px; color: var(--teal-dark); font-weight: 600; width: 48px; }
+    .field-name { font-size: 12px; color: var(--text-secondary); flex: 1; padding: 0 10px; }
+    .field-value {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 5px 10px;
+      font-size: 13px; font-weight: 600; font-family: 'Fira Code', monospace;
+      width: 100px; text-align: right;
+      color: var(--text-primary); outline: none;
+    }
+    .field-value:focus { border-color: var(--teal); }
+    .evidence-block {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px;
+      font-size: 12px; color: var(--text-secondary); line-height: 1.7;
+      font-style: italic;
+    }
+    .evidence-block blockquote { border-left: 3px solid var(--teal); padding-left: 12px; }
+    .notes-input {
+      width: 100%; padding: 10px 12px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); font-size: 13px; font-family: inherit;
+      color: var(--text-primary); outline: none; resize: vertical;
+    }
+    .notes-input:focus { border-color: var(--teal); }
+    .action-row { display: flex; gap: 8px; margin-top: 16px; }
+    .audit-entry {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .audit-entry:last-child { border-bottom: none; }
+    .audit-actor { font-weight: 600; width: 80px; flex-shrink: 0; }
+    .audit-action{ color: var(--text-secondary); flex: 1; }
+    .audit-time  { color: var(--text-muted); flex-shrink: 0; }
+
+    /* ── Misc ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .section-title { font-size: 15px; font-weight: 700; }
+    .text-muted { color: var(--text-muted); }
+    .text-secondary { color: var(--text-secondary); }
+    .mt-4 { margin-top: 4px; }
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mb-16 { margin-bottom: 16px; }
+    .flex-center { display: flex; align-items: center; }
+    .gap-6 { gap: 6px; }
+    .gap-8 { gap: 8px; }
+    .gap-10 { gap: 10px; }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: color .15s; margin-bottom: 20px;
+    }
+    .back-btn:hover { color: var(--teal); }
+    .rapid-mover-banner {
+      background: var(--risk-mover-light);
+      border: 1px solid var(--risk-mover);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 12px; color: var(--risk-mover-dark);
+      font-weight: 600; margin-bottom: 16px;
+    }
+    .freshenesss-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--green-light); color: #065F46;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .stale-chip {
+      background: var(--amber-light); color: var(--risk-elevated-dark);
+    }
+    .chart-container { position: relative; height: 220px; }
+    .chart-container-sm { position: relative; height: 180px; }
+    .legend-row {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--text-secondary);
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .risk-band-legend {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .risk-band-item {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 10px; color: var(--text-muted);
+    }
+    .risk-band-swatch { width: 12px; height: 4px; border-radius: 2px; }
+
+    /* Tabs filter */
+    .filter-tabs {
+      display: flex; gap: 0;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .filter-tab {
+      padding: 6px 14px; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all .15s;
+      color: var(--text-secondary); border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .filter-tab:last-child { border-right: none; }
+    .filter-tab:hover { background: var(--bg); }
+    .filter-tab.active { background: var(--teal); color: #fff; }
+
+    /* Notif count chip */
+    .count-chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      background: var(--red); color: #fff;
+      border-radius: 9px; font-size: 10px; font-weight: 700;
+    }
+
+    /* Source doc block */
+    .source-block {
+      background: var(--bg); border-radius: var(--radius-sm); padding: 12px;
+      display: flex; align-items: center; gap: 10px; font-size: 12px;
+    }
+    .source-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--blue-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* Score color helpers */
+    .score-normal   { color: var(--risk-normal); }
+    .score-elevated { color: var(--risk-elevated); }
+    .score-high     { color: var(--risk-high); }
+    .score-critical { color: var(--risk-critical); }
+    .score-muted    { color: var(--text-muted); }
+    .bg-normal   { background: var(--risk-normal); }
+    .bg-elevated { background: var(--risk-elevated); }
+    .bg-high     { background: var(--risk-high); }
+    .bg-critical { background: var(--risk-critical); }
+    .bg-teal     { background: var(--teal); }
+    .bg-muted    { background: var(--border); }
+
+    /* ─ Page header breadcrumb ─ */
+    .page-breadcrumb {
+      font-size: 11px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 5px; margin-bottom: 4px;
+    }
+    .page-breadcrumb span { cursor: pointer; }
+    .page-breadcrumb span:hover { color: var(--teal); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">SPRI</div>
+        <div class="logo-sub">Risk Monitor</div>
+      </div>
+    </div>
+  </div>
+  <div class="sidebar-role">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    Risk Analyst
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Monitoring</div>
+    <div class="nav-item active" onclick="showPage('monitor')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Monitor Dashboard
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-section">Operations</div>
+    <div class="nav-item" onclick="showPage('review')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Reserve Review
+      <span class="nav-badge-amber">2</span>
+    </div>
+    <div class="nav-section">System</div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Scoring Config
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Alert Rules
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">RJ</div>
+      <div>
+        <div class="user-name">Ryan Jordan</div>
+        <div class="user-role">Risk Analyst</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- ── Topbar ── -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="topbar-title">Monitor Dashboard</div>
+      <div class="topbar-sub" id="topbar-sub">Stablecoin Peg Risk Index</div>
+    </div>
+    <div class="topbar-actions">
+      <span class="refresh-time">Last refresh: 12:05 UTC</span>
+      <div class="select-wrap">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <select>
+          <option>24h</option>
+          <option>7d</option>
+          <option>30d</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary btn-sm">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
+        Refresh
+      </button>
+      <div class="icon-btn notif-dot">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ════════════════════════════════════════
+         PAGE 1: MONITOR DASHBOARD
+    ════════════════════════════════════════ -->
+    <div class="page active" id="page-monitor">
+
+      <!-- KPI Row -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-label">Tracked Coins</div>
+            <div class="kpi-value" style="color:var(--teal)">4</div>
+            <div class="kpi-sub">USDC · USDT · PYUSD · USDe</div>
+          </div>
+          <div class="kpi-icon" style="background:var(--teal-light)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-label">Active Alerts</div>
+            <div class="kpi-value score-high">3</div>
+            <div class="kpi-sub">2 High Risk · 1 Elevated</div>
+          </div>
+          <div class="kpi-icon" style="background:var(--risk-high-light)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-label">Rapid Movers</div>
+            <div class="kpi-value" style="color:var(--purple)">1</div>
+            <div class="kpi-sub">USDT · MC-1 +28pts</div>
+          </div>
+          <div class="kpi-icon" style="background:var(--risk-mover-light)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div>
+            <div class="kpi-label">Pending Review</div>
+            <div class="kpi-value score-elevated">2</div>
+            <div class="kpi-sub">Reserve Quality items</div>
+          </div>
+          <div class="kpi-icon" style="background:var(--amber-light)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stablecoin Cards Grid -->
+      <div class="section-header">
+        <div class="section-title">Stablecoin Risk Overview</div>
+        <div class="tabs">
+          <div class="tab active">All</div>
+          <div class="tab">Alerts</div>
+          <div class="tab">Rapid Movers</div>
+        </div>
+      </div>
+      <div class="coin-grid mb-16" style="margin-bottom:20px">
+
+        <!-- USDT — High Risk, Rapid Mover -->
+        <div class="coin-card rapid-mover-card" onclick="showPage('detail','USDT')">
+          <div class="coin-card-top">
+            <div>
+              <div class="coin-symbol">USDT</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Tether USD</div>
+            </div>
+            <div class="coin-score-wrap">
+              <div class="coin-score score-high">68</div>
+              <div class="coin-score-label">Score</div>
+            </div>
+          </div>
+          <div class="coin-risk-badge" style="background:var(--risk-high-light);color:var(--risk-high-dark)">
+            <span class="coin-risk-dot" style="background:var(--risk-high)"></span>
+            High Risk
+          </div>
+          <div class="dim-bars">
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">RQ</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-elevated" style="width:55%"></div></div>
+              <span class="dim-bar-val">55</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">MC</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-high" style="width:72%"></div></div>
+              <span class="dim-bar-val">72</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">OC</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-high" style="width:58%"></div></div>
+              <span class="dim-bar-val">58</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">SE</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-high" style="width:62%"></div></div>
+              <span class="dim-bar-val">62</span>
+            </div>
+          </div>
+          <div class="pill-row">
+            <span class="pill pill-mover">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+              Rapid Mover
+            </span>
+          </div>
+          <div class="view-detail-btn">View Detail →</div>
+        </div>
+
+        <!-- USDC — Elevated -->
+        <div class="coin-card" onclick="showPage('detail','USDC')">
+          <div class="coin-card-top">
+            <div>
+              <div class="coin-symbol">USDC</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">USD Coin</div>
+            </div>
+            <div class="coin-score-wrap">
+              <div class="coin-score score-elevated">41</div>
+              <div class="coin-score-label">Score</div>
+            </div>
+          </div>
+          <div class="coin-risk-badge" style="background:var(--risk-elevated-light);color:var(--risk-elevated-dark)">
+            <span class="coin-risk-dot" style="background:var(--risk-elevated)"></span>
+            Elevated
+          </div>
+          <div class="dim-bars">
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">RQ</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-elevated" style="width:35%"></div></div>
+              <span class="dim-bar-val">35</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">MC</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-elevated" style="width:45%"></div></div>
+              <span class="dim-bar-val">45</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">OC</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-normal" style="width:38%"></div></div>
+              <span class="dim-bar-val">38</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">SE</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-elevated" style="width:42%"></div></div>
+              <span class="dim-bar-val">42</span>
+            </div>
+          </div>
+          <div class="pill-row">
+            <span class="pill pill-review">Pending Review</span>
+          </div>
+          <div class="view-detail-btn">View Detail →</div>
+        </div>
+
+        <!-- PYUSD — Normal -->
+        <div class="coin-card" onclick="showPage('detail','PYUSD')">
+          <div class="coin-card-top">
+            <div>
+              <div class="coin-symbol">PYUSD</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">PayPal USD</div>
+            </div>
+            <div class="coin-score-wrap">
+              <div class="coin-score score-normal">24</div>
+              <div class="coin-score-label">Score</div>
+            </div>
+          </div>
+          <div class="coin-risk-badge" style="background:var(--risk-normal-light);color:var(--risk-normal-dark)">
+            <span class="coin-risk-dot" style="background:var(--risk-normal)"></span>
+            Normal
+          </div>
+          <div class="dim-bars">
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">RQ</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-normal" style="width:20%"></div></div>
+              <span class="dim-bar-val">20</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">MC</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-normal" style="width:25%"></div></div>
+              <span class="dim-bar-val">25</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">OC</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-normal" style="width:22%"></div></div>
+              <span class="dim-bar-val">22</span>
+            </div>
+            <div class="dim-bar-row">
+              <span class="dim-bar-label">SE</span>
+              <div class="dim-bar-track"><div class="dim-bar-fill bg-normal" style="width:28%"></div></div>
+              <span class="dim-bar-val">28</span>
+            </div>
+          </div>
+          <div class="pill-row"></div>
+          <div class="view-detail-btn">View Detail →</div>
+        </div>
+
+        <!-- USDe — Pending -->
+        <div class="coin-card coin-card-pending" style="background:var(--surface)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="pend-title">USDe</div>
+          <div style="font-size:11px;margin-top:4px;color:var(--text-muted)">Awaiting Data Initialization</div>
+          <div style="margin-top:12px">
+            <span class="pill pill-pending">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom grid: trend chart + alerts -->
+      <div class="bottom-grid">
+        <!-- Trend Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              SPRI Trend Overview
+            </div>
+            <div class="tabs">
+              <div class="tab active">7D</div>
+              <div class="tab">30D</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="trendChart"></canvas>
+            </div>
+            <div class="legend-row mt-4" style="margin-top:10px">
+              <div class="legend-item"><div class="legend-dot" style="background:#F97316"></div>USDT</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div>USDC</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#10B981"></div>PYUSD</div>
+            </div>
+            <div class="risk-band-legend">
+              <div class="risk-band-item"><div class="risk-band-swatch" style="background:#EF4444"></div>Critical (76-100)</div>
+              <div class="risk-band-item"><div class="risk-band-swatch" style="background:#F97316"></div>High (51-75)</div>
+              <div class="risk-band-item"><div class="risk-band-swatch" style="background:#F59E0B"></div>Elevated (26-50)</div>
+              <div class="risk-band-item"><div class="risk-band-swatch" style="background:#10B981"></div>Normal (0-25)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts Feed -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Alerts Feed
+            </div>
+            <span class="count-chip">3</span>
+          </div>
+          <div class="card-body">
+            <div class="alert-list">
+              <div class="alert-item" onclick="showPage('detail','USDT')">
+                <div class="alert-indicator" style="background:var(--risk-mover)"></div>
+                <div class="alert-body">
+                  <div class="alert-title">USDT — Rapid Mover Detected</div>
+                  <div class="alert-meta">MC-1 score +28 pts in one cycle · price deviation 50bp</div>
+                </div>
+                <div class="alert-time">12:05</div>
+              </div>
+              <div class="alert-item" onclick="showPage('detail','USDT')">
+                <div class="alert-indicator" style="background:var(--risk-high)"></div>
+                <div class="alert-body">
+                  <div class="alert-title">USDT → High Risk</div>
+                  <div class="alert-meta">Composite score crossed 51 threshold</div>
+                </div>
+                <div class="alert-time">12:03</div>
+              </div>
+              <div class="alert-item" onclick="showPage('detail','USDC')">
+                <div class="alert-indicator" style="background:var(--risk-elevated)"></div>
+                <div class="alert-body">
+                  <div class="alert-title">USDC — Elevated</div>
+                  <div class="alert-meta">MC-5 TVL drop exceeds 7-day avg baseline</div>
+                </div>
+                <div class="alert-time">11:48</div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-indicator" style="background:var(--text-muted)"></div>
+                <div class="alert-body">
+                  <div class="alert-title">USDe — Data Pending</div>
+                  <div class="alert-meta">Initialization required · 7-day window not met</div>
+                </div>
+                <div class="alert-time">11:30</div>
+              </div>
+              <div class="alert-item">
+                <div class="alert-indicator" style="background:var(--amber)"></div>
+                <div class="alert-body">
+                  <div class="alert-title">USDC — Review Required</div>
+                  <div class="alert-meta">RQ data awaiting human approval</div>
+                </div>
+                <div class="alert-time">10:15</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PAGE 2: STABLECOIN DETAIL (data-driven)
+    ════════════════════════════════════════ -->
+    <div class="page" id="page-detail" data-coin=""><!-- rendered by renderDetail() --></div>
+
+    <!-- ════════════════════════════════════════
+         PAGE 3: RESERVE REVIEW WORKSPACE
+    ════════════════════════════════════════ -->
+    <div class="page" id="page-review">
+      <div class="page-breadcrumb">
+        <span onclick="showPage('monitor')">Monitor Dashboard</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Reserve Review</span>
+      </div>
+
+      <div class="section-header mb-16" style="margin-bottom:16px">
+        <div>
+          <div class="section-title">Reserve Review Workspace</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:3px">AI-assisted extraction · Human review required</div>
+        </div>
+        <div class="flex-center gap-8">
+          <span class="badge badge-orange badge-dot">2 Pending</span>
+          <button class="btn btn-secondary btn-sm">Export Log</button>
+        </div>
+      </div>
+
+      <div class="review-layout">
+
+        <!-- LEFT: Queue Panel -->
+        <div>
+          <div class="card" style="position:sticky;top:72px">
+            <div class="card-header">
+              <div class="card-title">Review Queue</div>
+            </div>
+            <div style="padding:10px 16px 8px;border-bottom:1px solid var(--border)">
+              <div class="filter-tabs">
+                <div class="filter-tab active">All (4)</div>
+                <div class="filter-tab">Pending (2)</div>
+                <div class="filter-tab">Done (2)</div>
+              </div>
+            </div>
+            <div class="review-queue-list">
+              <div class="review-queue-item active">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--risk-elevated);flex-shrink:0"></div>
+                <div style="flex:1;min-width:0">
+                  <div class="rq-coin">USDC</div>
+                  <div class="rq-source">Circle Q1 2026 Attestation</div>
+                  <div class="rq-date">Submitted Apr 23 · 09:15</div>
+                </div>
+                <div class="rq-right">
+                  <span class="badge badge-amber" style="font-size:10px">Pending</span>
+                </div>
+              </div>
+              <div class="review-queue-item">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0"></div>
+                <div style="flex:1;min-width:0">
+                  <div class="rq-coin">USDT</div>
+                  <div class="rq-source">Tether Supplemental (Apr)</div>
+                  <div class="rq-date">Submitted Apr 22 · 17:40</div>
+                </div>
+                <div class="rq-right">
+                  <span class="badge badge-red" style="font-size:10px">Manual</span>
+                </div>
+              </div>
+              <div class="review-queue-item">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--risk-normal);flex-shrink:0"></div>
+                <div style="flex:1;min-width:0">
+                  <div class="rq-coin">USDT</div>
+                  <div class="rq-source">Tether Q1 2026 Attestation</div>
+                  <div class="rq-date">Approved Apr 15 · 14:30</div>
+                </div>
+                <div class="rq-right">
+                  <span class="badge badge-green" style="font-size:10px">Approved</span>
+                </div>
+              </div>
+              <div class="review-queue-item">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--risk-normal);flex-shrink:0"></div>
+                <div style="flex:1;min-width:0">
+                  <div class="rq-coin">PYUSD</div>
+                  <div class="rq-source">PayPal Mar 2026 Report</div>
+                  <div class="rq-date">Approved Apr 10 · 11:20</div>
+                </div>
+                <div class="rq-right">
+                  <span class="badge badge-green" style="font-size:10px">Approved</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Review Detail Panel -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="mono" style="font-size:14px">USDC</span>
+                <span style="font-weight:400;color:var(--text-secondary)">— Circle Q1 2026 Attestation</span>
+              </div>
+              <span class="badge badge-amber badge-dot">Pending Review</span>
+            </div>
+            <div class="card-body">
+
+              <!-- Source Metadata -->
+              <div class="review-detail-section">
+                <div class="review-section-title">Source Metadata</div>
+                <div class="source-block">
+                  <div class="source-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </div>
+                  <div style="flex:1">
+                    <div style="font-weight:600;font-size:13px">Circle_Q1_2026_Reserve_Attestation.pdf</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:2px">circle.com/legal/usdc-transparency · Extracted Apr 23, 09:15 UTC</div>
+                  </div>
+                  <button class="btn btn-secondary btn-sm">View Source</button>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+                  <div style="background:var(--bg);padding:10px;border-radius:var(--radius-sm)">
+                    <div style="font-size:11px;color:var(--text-muted)">Document Type</div>
+                    <div style="font-size:13px;font-weight:600;margin-top:2px">Attestation Report</div>
+                  </div>
+                  <div style="background:var(--bg);padding:10px;border-radius:var(--radius-sm)">
+                    <div style="font-size:11px;color:var(--text-muted)">AI Confidence</div>
+                    <div class="confidence-bar-wrap" style="margin-top:4px">
+                      <div class="confidence-bar"><div class="confidence-fill bg-teal" style="width:82%"></div></div>
+                      <span class="confidence-label score-normal">82%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Suggested Fields -->
+              <div class="review-detail-section">
+                <div class="review-section-title">AI-Extracted Fields — Please Review</div>
+                <div class="field-input-row">
+                  <span class="field-id">RQ-1</span>
+                  <span class="field-name">Safe Reserve Asset Ratio</span>
+                  <input class="field-value" type="text" value="91%" />
+                </div>
+                <div class="field-input-row">
+                  <span class="field-id">RQ-3</span>
+                  <span class="field-name">Reserve / Circulating Supply</span>
+                  <input class="field-value" type="text" value="1.02×" />
+                </div>
+                <div class="field-input-row">
+                  <span class="field-id">RQ-4</span>
+                  <span class="field-name">Days Since Attestation Due</span>
+                  <input class="field-value" type="text" value="2 days" />
+                </div>
+              </div>
+
+              <!-- Evidence Excerpt -->
+              <div class="review-detail-section">
+                <div class="review-section-title">Evidence / Source Excerpt</div>
+                <div class="evidence-block">
+                  <blockquote>
+                    "As of March 31, 2026, Circle holds USD Coin reserves consisting of approximately <strong>91%</strong> in U.S. Treasury Bills and reverse repurchase agreements backed by U.S. Treasury Bills, with the remaining <strong>9%</strong> in cash deposits at regulated financial institutions. Total reserve assets were USD <strong>$42.8 billion</strong>, representing <strong>102%</strong> of circulating USDC supply of $42.0 billion."
+                  </blockquote>
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:8px">— Page 4, Circle Q1 2026 Reserve Attestation, Deloitte & Touche LLP</div>
+                </div>
+              </div>
+
+              <!-- Reviewer Notes -->
+              <div class="review-detail-section">
+                <div class="review-section-title">Reviewer Notes</div>
+                <textarea class="notes-input" rows="3" placeholder="Add notes or modification reasons (required if fields are edited before approval)..."></textarea>
+              </div>
+
+              <!-- Actions -->
+              <div class="action-row">
+                <button class="btn btn-primary" onclick="approveReview()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  Approve
+                </button>
+                <button class="btn btn-secondary">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  Edit & Approve
+                </button>
+                <button class="btn btn-danger">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                  Reject
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Audit Trail -->
+          <div class="card" style="margin-top:16px">
+            <div class="card-header">
+              <div class="card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Audit Trail
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="audit-entry">
+                <span class="audit-actor">AI Extractor</span>
+                <span class="audit-action">Extracted 3 RQ fields from Circle Q1 2026 attestation · confidence 82%</span>
+                <span class="audit-time">Apr 23 · 09:15</span>
+              </div>
+              <div class="audit-entry">
+                <span class="audit-actor">System</span>
+                <span class="audit-action">Review item created · status set to "pending review"</span>
+                <span class="audit-time">Apr 23 · 09:15</span>
+              </div>
+              <div class="audit-entry">
+                <span class="audit-actor" style="color:var(--text-muted)">Pending...</span>
+                <span class="audit-action" style="color:var(--text-muted)">Awaiting reviewer decision</span>
+                <span class="audit-time">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Approval confirmation toast (hidden by default) -->
+<div id="toast" style="
+  position:fixed; bottom:24px; right:24px;
+  background:var(--risk-normal-dark); color:#fff;
+  padding:12px 20px; border-radius:var(--radius-sm);
+  font-size:13px; font-weight:600; box-shadow:var(--shadow-md);
+  display:none; align-items:center; gap:8px; z-index:999;
+">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  USDC Reserve data approved and submitted to scoring pipeline.
+</div>
+
+<script>
+  /* ════════════════════════════════════════════
+     COIN DATA — source of truth for detail pages
+  ════════════════════════════════════════════ */
+  const COINS = {
+    USDT: {
+      symbol: 'USDT', name: 'Tether USD',
+      score: 68, riskLabel: 'High Risk',
+      riskScoreClass: 'score-high', riskBadgeClass: 'badge-orange',
+      riskColor: 'var(--risk-high)', riskBgLight: 'var(--risk-high-light)', riskDark: 'var(--risk-high-dark)',
+      currentThreshold: 'High: 51-75',
+      isRapidMover: true, rapidMoverVar: 'MC-1', rapidMoverDelta: '+28',
+      freshness: '3m', updated: '12:05 UTC',
+      reviewStatus: 'Approved', reviewBadge: 'badge-green',
+      reviewSource: 'Tether Q1 2026 Attestation Report · Apr 15, 2026',
+      reviewedBy: 'Karen Walsh · No modifications', reviewDate: 'Apr 15, 2026 · 14:30 UTC',
+      dims: { RQ:{score:55,cls:'elevated'}, MC:{score:72,cls:'high'}, OC:{score:58,cls:'high'}, SE:{score:62,cls:'high'} },
+      trendData:   [32, 38, 42, 45, 52, 58, 68],
+      trendMCData: [28, 38, 44, 48, 60, 66, 72],
+      trendColor: '#F97316', trendBg: 'rgba(249,115,22,0.1)',
+      drivers: [
+        { rank:'#1', rankColor:'var(--risk-high)', id:'MC-1', name:'Price Peg Deviation', desc:'50bp deviation from $1.00 · currently $0.9950', score:78, scoreClass:'score-high' },
+        { rank:'#2', rankColor:'var(--risk-high)', id:'MC-8', name:'Volume Anomaly', desc:'2.0σ vs 30-day avg · abnormally high volume', score:70, scoreClass:'score-high' },
+        { rank:'#3', rankColor:'var(--risk-elevated)', id:'RQ-3', name:'Reserve Coverage Ratio', desc:'Reserve/circulation 0.96× · below 1.0× threshold', score:55, scoreClass:'score-elevated' },
+      ],
+      variables: [
+        { id:'MC-1', name:'Price Peg Deviation', dim:'MC', dimCls:'badge-orange', raw:'50 bp', score:78, scoreCls:'var(--risk-high)', updated:'12:05', statusLbl:'High', statusCls:'badge-orange',
+          detail:'<strong>Definition:</strong> Price deviation from $1.00 peg in basis points.<br><strong>Rule (MC-1):</strong> 0bp→0; 10bp→25; 20bp→50; 50bp→75; 100bp→100.<br><strong>Current raw:</strong> $0.9950 (50bp below peg) → <strong>Score: 78</strong><br><strong>Source:</strong> CoinGecko price feed · 12:05 UTC' },
+        { id:'MC-8', name:'Volume Anomaly', dim:'MC', dimCls:'badge-orange', raw:'2.0σ', score:70, scoreCls:'var(--risk-high)', updated:'12:00', statusLbl:'High', statusCls:'badge-orange',
+          detail:'<strong>Definition:</strong> Volume deviation from 30-day avg in standard deviations.<br><strong>Rule (MC-8):</strong> 0σ→0; 0.5σ→25; 1.0σ→50; 1.5σ→75; 2.0+σ→100. Requires 30-day backfill.<br><strong>Current raw:</strong> 2.0σ above 30-day avg → <strong>Score: 70</strong><br><strong>Source:</strong> On-chain volume aggregator · 12:00 UTC' },
+        { id:'RQ-3', name:'Reserve Coverage Ratio', dim:'RQ', dimCls:'badge-amber', raw:'0.96×', score:55, scoreCls:'var(--risk-elevated)', updated:'11:45', statusLbl:'Elevated', statusCls:'badge-amber',
+          detail:'<strong>Definition:</strong> Reserve assets / circulating supply.<br><strong>Rule (RQ-3):</strong> ≥1.1×→0; 1.0×→25; 0.95×→50; 0.90×→75; ≤0.85×→100.<br><strong>Current raw:</strong> $68.2B/$71.0B=0.96× → <strong>Score: 55</strong><br><strong>Source:</strong> Tether attestation (AI extracted, human reviewed)' },
+        { id:'OC-7', name:'Supply Change', dim:'OC', dimCls:'badge-teal', raw:'-3.2%', score:58, scoreCls:'var(--risk-high)', updated:'12:00', statusLbl:'High', statusCls:'badge-orange',
+          detail:'<strong>Definition:</strong> TotalSupply single-day change (supply decrease only).<br><strong>Rule (OC-7):</strong> 0%→0; -1%→25; -2%→50; -3%→75; -4%→100.<br><strong>Current raw:</strong> Supply -3.2% ($71.0B→$68.8B) → <strong>Score: 58</strong><br><strong>Source:</strong> Ethereum on-chain data' },
+        { id:'MC-5', name:'TVL Change (7D)', dim:'MC', dimCls:'badge-orange', raw:'-8.5%', score:45, scoreCls:'var(--risk-elevated)', updated:'12:00', statusLbl:'Elevated', statusCls:'badge-amber',
+          detail:'<strong>Definition:</strong> TVL change vs 7-day average. Requires ≥7 days backfill.<br><strong>Rule (MC-5):</strong> 0%→0; -5%→25; -10%→50; -15%→75; -20%→100.<br><strong>Current raw:</strong> TVL -8.5% vs 7-day avg → <strong>Score: 45</strong><br><strong>Source:</strong> DeFiLlama TVL API' },
+        { id:'RQ-1', name:'Safe Reserve Asset Ratio', dim:'RQ', dimCls:'badge-amber', raw:'78%', score:40, scoreCls:'var(--risk-elevated)', updated:'11:45', statusLbl:'Elevated', statusCls:'badge-amber',
+          detail:'<strong>Definition:</strong> Proportion of reserves in safe assets (T-bills, cash, equiv).<br><strong>Rule (RQ-1):</strong> ≥95%→0; 85%→25; 75%→50; 65%→75; ≤55%→100.<br><strong>Current raw:</strong> 78% safe ratio → <strong>Score: 40</strong><br><strong>Source:</strong> Tether Q1 2026 attestation (AI extracted, human reviewed)' },
+        { id:'RQ-4', name:'Attestation Overdue', dim:'RQ', dimCls:'badge-amber', raw:'5 days', score:20, scoreCls:'var(--risk-normal)', updated:'system', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Days since last attestation was due.<br><strong>Rule (RQ-4):</strong> 0d→0; 30d→25; 60d→50; 90d→75; ≥120d→100.<br><strong>Current raw:</strong> 5 days overdue → <strong>Score: 20</strong><br><strong>Source:</strong> System date vs attestation schedule' },
+        { id:'SE-2', name:'Negative Sentiment', dim:'SE', dimCls:'badge-purple', raw:'28%', score:45, scoreCls:'var(--risk-elevated)', updated:'11:30', statusLbl:'Elevated', statusCls:'badge-amber',
+          detail:'<strong>Definition:</strong> Community negative sentiment proportion about peg stability.<br><strong>Rule (SE-2):</strong> 0%→0; 10%→25; 20%→50; 30%→75; ≥40%→100.<br><strong>Current raw:</strong> 28% negative → <strong>Score: 45</strong><br><strong>Source:</strong> Social sentiment aggregator' },
+        { id:'SE-4', name:'FRED Rate Threshold', dim:'SE', dimCls:'badge-purple', raw:'5.25%', score:60, scoreCls:'var(--risk-high)', updated:'daily', statusLbl:'High', statusCls:'badge-orange',
+          detail:'<strong>Definition:</strong> Federal Reserve rate vs stablecoin stress threshold.<br><strong>Rule (SE-4):</strong> ≤2%→0; 3%→25; 4%→50; 5%→75; ≥6%→100.<br><strong>Current raw:</strong> Fed rate 5.25% → <strong>Score: 60</strong><br><strong>Source:</strong> FRED API' },
+      ],
+      alerts: [
+        { color:'var(--risk-mover)', title:'Rapid Mover — MC-1', desc:'Score spiked +28 pts · price deviation 50bp', time:'12:05', hasLine:true },
+        { color:'var(--risk-high)', title:'Level Change: Elevated → High Risk', desc:'Composite score crossed 51 threshold', time:'12:03', hasLine:true },
+        { color:'var(--risk-elevated)', title:'Level Change: Normal → Elevated', desc:'MC-8 volume anomaly trigger exceeded baseline', time:'Apr 22 · 18:30', hasLine:true },
+        { color:'var(--risk-normal)', title:'Score Recovered → Normal', desc:'All variables within safe range', time:'Apr 20 · 09:00', hasLine:false },
+      ],
+      reviewFields: [
+        { id:'RQ-1', label:'Safe Reserve Ratio', val:'78%', by:'Reviewed by K.Walsh' },
+        { id:'RQ-3', label:'Reserve/Supply Ratio', val:'0.96×', by:'Reviewed by K.Walsh' },
+        { id:'RQ-4', label:'Days Since Attestation', val:'5 days', by:'Auto-calculated' },
+      ],
+    },
+
+    USDC: {
+      symbol: 'USDC', name: 'USD Coin',
+      score: 41, riskLabel: 'Elevated',
+      riskScoreClass: 'score-elevated', riskBadgeClass: 'badge-amber',
+      riskColor: 'var(--risk-elevated)', riskBgLight: 'var(--risk-elevated-light)', riskDark: 'var(--risk-elevated-dark)',
+      currentThreshold: 'Elevated: 26-50',
+      isRapidMover: false,
+      freshness: '5m', updated: '12:00 UTC',
+      reviewStatus: 'Pending', reviewBadge: 'badge-amber',
+      reviewSource: 'Circle Q1 2026 Attestation · Submitted Apr 23, 2026',
+      reviewedBy: 'Awaiting reviewer decision', reviewDate: 'Submitted Apr 23 · 09:15 UTC',
+      dims: { RQ:{score:35,cls:'normal'}, MC:{score:45,cls:'elevated'}, OC:{score:38,cls:'elevated'}, SE:{score:42,cls:'elevated'} },
+      trendData:   [28, 30, 35, 38, 40, 39, 41],
+      trendMCData: [22, 28, 32, 36, 42, 40, 45],
+      trendColor: '#F59E0B', trendBg: 'rgba(245,158,11,0.1)',
+      drivers: [
+        { rank:'#1', rankColor:'var(--risk-high)', id:'SE-4', name:'FRED Rate Threshold', desc:'Fed rate 5.25% · elevated macro risk environment', score:60, scoreClass:'score-high' },
+        { rank:'#2', rankColor:'var(--risk-elevated)', id:'MC-5', name:'TVL Change (7D)', desc:'-12% TVL vs 7-day avg · moderate outflow signal', score:55, scoreClass:'score-elevated' },
+        { rank:'#3', rankColor:'var(--risk-elevated)', id:'SE-2', name:'Negative Sentiment', desc:'22% negative sentiment · mild community concern', score:40, scoreClass:'score-elevated' },
+      ],
+      variables: [
+        { id:'MC-1', name:'Price Peg Deviation', dim:'MC', dimCls:'badge-orange', raw:'8 bp', score:20, scoreCls:'var(--risk-normal)', updated:'12:00', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Price deviation from $1.00 peg in basis points.<br><strong>Current raw:</strong> $0.9992 (8bp below peg) → <strong>Score: 20</strong><br><strong>Source:</strong> CoinGecko price feed · 12:00 UTC' },
+        { id:'MC-8', name:'Volume Anomaly', dim:'MC', dimCls:'badge-orange', raw:'0.8σ', score:35, scoreCls:'var(--risk-elevated)', updated:'12:00', statusLbl:'Elevated', statusCls:'badge-amber',
+          detail:'<strong>Definition:</strong> Volume deviation from 30-day avg in standard deviations.<br><strong>Current raw:</strong> 0.8σ above 30-day avg → <strong>Score: 35</strong><br><strong>Source:</strong> On-chain volume aggregator · 12:00 UTC' },
+        { id:'RQ-3', name:'Reserve Coverage Ratio', dim:'RQ', dimCls:'badge-amber', raw:'1.02×', score:20, scoreCls:'var(--risk-normal)', updated:'pending', statusLbl:'Pending', statusCls:'badge-gray',
+          detail:'<strong>Definition:</strong> Reserve assets / circulating supply.<br><strong>Current raw:</strong> AI-extracted 1.02× pending human review → <strong>Preliminary Score: 20</strong><br><strong>Note:</strong> Will be finalised after Reserve Review approval' },
+        { id:'OC-7', name:'Supply Change', dim:'OC', dimCls:'badge-teal', raw:'-0.8%', score:20, scoreCls:'var(--risk-normal)', updated:'12:00', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> TotalSupply single-day change (supply decrease only).<br><strong>Current raw:</strong> Supply -0.8% → <strong>Score: 20</strong><br><strong>Source:</strong> Ethereum on-chain data' },
+        { id:'MC-5', name:'TVL Change (7D)', dim:'MC', dimCls:'badge-orange', raw:'-12%', score:55, scoreCls:'var(--risk-elevated)', updated:'12:00', statusLbl:'Elevated', statusCls:'badge-amber',
+          detail:'<strong>Definition:</strong> TVL change vs 7-day average.<br><strong>Current raw:</strong> TVL -12% vs 7-day avg → <strong>Score: 55</strong><br><strong>Source:</strong> DeFiLlama TVL API' },
+        { id:'RQ-1', name:'Safe Reserve Asset Ratio', dim:'RQ', dimCls:'badge-amber', raw:'91%', score:15, scoreCls:'var(--risk-normal)', updated:'pending', statusLbl:'Pending', statusCls:'badge-gray',
+          detail:'<strong>Definition:</strong> Proportion of reserves in safe assets.<br><strong>Current raw:</strong> AI-extracted 91% pending human review → <strong>Preliminary Score: 15</strong><br><strong>Source:</strong> Circle Q1 2026 attestation (pending review)' },
+        { id:'RQ-4', name:'Attestation Overdue', dim:'RQ', dimCls:'badge-amber', raw:'2 days', score:10, scoreCls:'var(--risk-normal)', updated:'system', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Days since last attestation was due.<br><strong>Current raw:</strong> 2 days overdue → <strong>Score: 10</strong><br><strong>Source:</strong> System date vs attestation schedule' },
+        { id:'SE-2', name:'Negative Sentiment', dim:'SE', dimCls:'badge-purple', raw:'22%', score:40, scoreCls:'var(--risk-elevated)', updated:'11:30', statusLbl:'Elevated', statusCls:'badge-amber',
+          detail:'<strong>Definition:</strong> Community negative sentiment proportion.<br><strong>Current raw:</strong> 22% negative → <strong>Score: 40</strong><br><strong>Source:</strong> Social sentiment aggregator' },
+        { id:'SE-4', name:'FRED Rate Threshold', dim:'SE', dimCls:'badge-purple', raw:'5.25%', score:60, scoreCls:'var(--risk-high)', updated:'daily', statusLbl:'High', statusCls:'badge-orange',
+          detail:'<strong>Definition:</strong> Federal Reserve rate vs stablecoin stress threshold.<br><strong>Current raw:</strong> Fed rate 5.25% → <strong>Score: 60</strong><br><strong>Source:</strong> FRED API' },
+      ],
+      alerts: [
+        { color:'var(--risk-elevated)', title:'Level Change: Normal → Elevated', desc:'MC-5 TVL drop exceeds 7-day avg baseline', time:'11:48', hasLine:true },
+        { color:'var(--amber)', title:'Reserve Review Required', desc:'Q1 2026 attestation pending human approval', time:'Apr 23 · 09:15', hasLine:true },
+        { color:'var(--risk-normal)', title:'Score Stable — Normal Range', desc:'No alerts for past 7 days prior to this cycle', time:'Apr 16 · 14:00', hasLine:false },
+      ],
+      reviewFields: [
+        { id:'RQ-1', label:'Safe Reserve Ratio', val:'91% (AI)', by:'Pending review' },
+        { id:'RQ-3', label:'Reserve/Supply Ratio', val:'1.02× (AI)', by:'Pending review' },
+        { id:'RQ-4', label:'Days Since Attestation', val:'2 days', by:'Auto-calculated' },
+      ],
+    },
+
+    PYUSD: {
+      symbol: 'PYUSD', name: 'PayPal USD',
+      score: 24, riskLabel: 'Normal',
+      riskScoreClass: 'score-normal', riskBadgeClass: 'badge-green',
+      riskColor: 'var(--risk-normal)', riskBgLight: 'var(--risk-normal-light)', riskDark: 'var(--risk-normal-dark)',
+      currentThreshold: 'Normal: 0-25',
+      isRapidMover: false,
+      freshness: '8m', updated: '11:57 UTC',
+      reviewStatus: 'Approved', reviewBadge: 'badge-green',
+      reviewSource: 'PayPal Mar 2026 Reserve Report · Approved Apr 10, 2026',
+      reviewedBy: 'Alex Torres · No modifications', reviewDate: 'Approved Apr 10 · 11:20 UTC',
+      dims: { RQ:{score:20,cls:'normal'}, MC:{score:25,cls:'normal'}, OC:{score:22,cls:'normal'}, SE:{score:28,cls:'normal'} },
+      trendData:   [18, 20, 22, 21, 23, 24, 24],
+      trendMCData: [15, 18, 20, 19, 22, 24, 25],
+      trendColor: '#10B981', trendBg: 'rgba(16,185,129,0.1)',
+      drivers: [
+        { rank:'#1', rankColor:'var(--risk-high)', id:'SE-4', name:'FRED Rate Threshold', desc:'Fed rate 5.25% · macro environment shared across all coins', score:60, scoreClass:'score-high' },
+        { rank:'#2', rankColor:'var(--risk-normal)', id:'SE-2', name:'Negative Sentiment', desc:'12% negative sentiment · within normal range', score:22, scoreClass:'score-normal' },
+        { rank:'#3', rankColor:'var(--risk-normal)', id:'MC-5', name:'TVL Change (7D)', desc:'-3% TVL vs 7-day avg · minor fluctuation', score:18, scoreClass:'score-normal' },
+      ],
+      variables: [
+        { id:'MC-1', name:'Price Peg Deviation', dim:'MC', dimCls:'badge-orange', raw:'3 bp', score:8, scoreCls:'var(--risk-normal)', updated:'11:57', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Price deviation from $1.00 peg in basis points.<br><strong>Current raw:</strong> $0.9997 (3bp below peg) → <strong>Score: 8</strong><br><strong>Source:</strong> CoinGecko price feed · 11:57 UTC' },
+        { id:'MC-8', name:'Volume Anomaly', dim:'MC', dimCls:'badge-orange', raw:'0.2σ', score:10, scoreCls:'var(--risk-normal)', updated:'11:55', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Volume deviation from 30-day avg in standard deviations.<br><strong>Current raw:</strong> 0.2σ above 30-day avg → <strong>Score: 10</strong><br><strong>Source:</strong> On-chain volume aggregator' },
+        { id:'RQ-3', name:'Reserve Coverage Ratio', dim:'RQ', dimCls:'badge-amber', raw:'1.08×', score:10, scoreCls:'var(--risk-normal)', updated:'Apr 10', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Reserve assets / circulating supply.<br><strong>Current raw:</strong> 1.08× reserve ratio → <strong>Score: 10</strong><br><strong>Source:</strong> PayPal Mar 2026 report (AI extracted, human reviewed)' },
+        { id:'OC-7', name:'Supply Change', dim:'OC', dimCls:'badge-teal', raw:'+0.5%', score:0, scoreCls:'var(--risk-normal)', updated:'11:57', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> TotalSupply single-day change (supply decrease only counts as risk).<br><strong>Current raw:</strong> Supply +0.5% (increase) → <strong>Score: 0</strong> (only decreases trigger risk)<br><strong>Source:</strong> Ethereum on-chain data' },
+        { id:'MC-5', name:'TVL Change (7D)', dim:'MC', dimCls:'badge-orange', raw:'-3%', score:18, scoreCls:'var(--risk-normal)', updated:'11:55', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> TVL change vs 7-day average.<br><strong>Current raw:</strong> TVL -3% vs 7-day avg → <strong>Score: 18</strong><br><strong>Source:</strong> DeFiLlama TVL API' },
+        { id:'RQ-1', name:'Safe Reserve Asset Ratio', dim:'RQ', dimCls:'badge-amber', raw:'95%', score:5, scoreCls:'var(--risk-normal)', updated:'Apr 10', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Proportion of reserves in safe assets.<br><strong>Current raw:</strong> 95% safe reserve ratio → <strong>Score: 5</strong><br><strong>Source:</strong> PayPal Mar 2026 report (AI extracted, human reviewed)' },
+        { id:'RQ-4', name:'Attestation Overdue', dim:'RQ', dimCls:'badge-amber', raw:'0 days', score:0, scoreCls:'var(--risk-normal)', updated:'system', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Days since last attestation was due.<br><strong>Current raw:</strong> On schedule, 0 days overdue → <strong>Score: 0</strong>' },
+        { id:'SE-2', name:'Negative Sentiment', dim:'SE', dimCls:'badge-purple', raw:'12%', score:22, scoreCls:'var(--risk-normal)', updated:'11:30', statusLbl:'Normal', statusCls:'badge-green',
+          detail:'<strong>Definition:</strong> Community negative sentiment proportion.<br><strong>Current raw:</strong> 12% negative → <strong>Score: 22</strong><br><strong>Source:</strong> Social sentiment aggregator' },
+        { id:'SE-4', name:'FRED Rate Threshold', dim:'SE', dimCls:'badge-purple', raw:'5.25%', score:60, scoreCls:'var(--risk-high)', updated:'daily', statusLbl:'High', statusCls:'badge-orange',
+          detail:'<strong>Definition:</strong> Federal Reserve rate vs stablecoin stress threshold.<br><strong>Note:</strong> SE-4 is a macro factor shared by all stablecoins, explaining why even a Normal-scored coin has one high variable.<br><strong>Current raw:</strong> Fed rate 5.25% → <strong>Score: 60</strong><br><strong>Source:</strong> FRED API' },
+      ],
+      alerts: [
+        { color:'var(--risk-normal)', title:'All Variables Normal', desc:'No anomalies detected in current scoring cycle', time:'11:57', hasLine:true },
+        { color:'var(--risk-normal)', title:'Reserve Reviewed — Approved', desc:'PayPal Mar 2026 attestation approved by A.Torres', time:'Apr 10 · 11:20', hasLine:false },
+      ],
+      reviewFields: [
+        { id:'RQ-1', label:'Safe Reserve Ratio', val:'95%', by:'Reviewed by A.Torres' },
+        { id:'RQ-3', label:'Reserve/Supply Ratio', val:'1.08×', by:'Reviewed by A.Torres' },
+        { id:'RQ-4', label:'Days Since Attestation', val:'0 days', by:'Auto-calculated' },
+      ],
+    },
+  };
+
+  /* ════════════════════════════════════════════
+     DETAIL PAGE RENDERER
+  ════════════════════════════════════════════ */
+  let detailChartInst = null;
+
+  function scoreClass(s) {
+    if (s >= 76) return 'score-critical';
+    if (s >= 51) return 'score-high';
+    if (s >= 26) return 'score-elevated';
+    return 'score-normal';
+  }
+  function dimBgClass(s) {
+    if (s >= 76) return 'bg-critical';
+    if (s >= 51) return 'bg-high';
+    if (s >= 26) return 'bg-elevated';
+    return 'bg-normal';
+  }
+  function thresholdRows(current) {
+    const rows = [
+      { range:'Critical: 76-100', col:'var(--risk-critical)', key:'Critical' },
+      { range:'High: 51-75',      col:'var(--risk-high)',     key:'High' },
+      { range:'Elevated: 26-50',  col:'var(--risk-elevated)', key:'Elevated' },
+      { range:'Normal: 0-25',     col:'var(--risk-normal)',   key:'Normal' },
+    ];
+    return rows.map(r => {
+      const isCur = current.startsWith(r.key);
+      return `<div style="display:flex;align-items:center;gap:6px;font-size:11px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${r.col};${isCur?'outline:2px solid '+r.col+';outline-offset:2px':''}"></div>
+        <span style="${isCur?'font-weight:700':'color:var(--text-muted)'}">${r.range}${isCur?' ◀ Current':''}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function renderDetail(symbol) {
+    const c = COINS[symbol];
+    const el = document.getElementById('page-detail');
+    el.setAttribute('data-coin', symbol);
+
+    // Rapid Mover banner (only if applicable)
+    const bannerHtml = c.isRapidMover ? `
+      <div class="rapid-mover-banner">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <strong>Rapid Mover Detected</strong> — ${c.rapidMoverVar} increased ${c.rapidMoverDelta} points in the last scoring cycle. Immediate review recommended.
+      </div>` : '';
+
+    // Extra badges
+    const extraBadges = c.isRapidMover
+      ? `<span class="badge ${c.riskBadgeClass} badge-dot">${c.riskLabel}</span><span class="badge badge-purple badge-dot">Rapid Mover</span>`
+      : `<span class="badge ${c.riskBadgeClass} badge-dot">${c.riskLabel}</span>`;
+
+    // Dimensions
+    const dimHtml = Object.entries(c.dims).map(([key, d]) => `
+      <div class="dim-card">
+        <div class="dim-card-label">${key}</div>
+        <div class="dim-card-name">${{RQ:'Reserve Quality',MC:'Market Confidence',OC:'On-Chain Behaviour',SE:'Sentiment & External'}[key]}</div>
+        <div class="dim-card-score ${scoreClass(d.score)}">${d.score}</div>
+        <div class="dim-card-gauge"><div class="dim-card-gauge-fill ${dimBgClass(d.score)}" style="width:${d.score}%"></div></div>
+      </div>`).join('');
+
+    // Drivers
+    const driversHtml = c.drivers.map(d => `
+      <div class="driver-item">
+        <div class="driver-rank-badge" style="background:${d.rankColor}">${d.rank}</div>
+        <div class="driver-id">${d.id}</div>
+        <div class="driver-info">
+          <div class="driver-name">${d.name}</div>
+          <div class="driver-desc">${d.desc}</div>
+        </div>
+        <div class="driver-score-wrap">
+          <div class="driver-score ${d.scoreClass}">${d.score}</div>
+          <div class="driver-score-label">risk score</div>
+        </div>
+      </div>`).join('');
+
+    // Variables table rows
+    const varRowsHtml = c.variables.map((v, i) => `
+      <tr onclick="toggleExpandDyn('vrow-${symbol}-${i}')" style="cursor:pointer">
+        <td><span class="mono">${v.id}</span></td>
+        <td style="font-weight:600">${v.name}</td>
+        <td><span class="badge ${v.dimCls}">${v.dim}</span></td>
+        <td style="font-family:'Fira Code',monospace;font-size:12px">${v.raw}</td>
+        <td><span style="font-weight:700;color:${v.scoreCls}">${v.score}</span></td>
+        <td style="color:var(--text-muted);font-size:12px">${v.updated}</td>
+        <td><span class="badge ${v.statusCls} badge-dot" style="font-size:10px">${v.statusLbl}</span></td>
+      </tr>
+      <tr id="vrow-${symbol}-${i}" style="display:none">
+        <td class="expand-td" colspan="7"><div class="expand-content">${v.detail}</div></td>
+      </tr>`).join('');
+
+    // Alert timeline
+    const alertsHtml = c.alerts.map(a => `
+      <div class="timeline-item">
+        <div class="timeline-dot-wrap">
+          <div class="timeline-dot" style="background:${a.color}"></div>
+          ${a.hasLine ? '<div class="timeline-line"></div>' : ''}
+        </div>
+        <div class="timeline-content">
+          <div class="timeline-title">${a.title}</div>
+          <div class="timeline-desc">${a.desc}</div>
+        </div>
+        <div class="timeline-time">${a.time}</div>
+      </div>`).join('');
+
+    // Reserve review fields
+    const reviewFieldsHtml = c.reviewFields.map(f => `
+      <div class="review-status-item">
+        <div>
+          <div class="review-field-id">${f.id}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${f.label}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="review-field-val">${f.val}</div>
+          <div class="review-reviewer">${f.by}</div>
+        </div>
+      </div>`).join('');
+
+    el.innerHTML = `
+      <div class="page-breadcrumb">
+        <span onclick="showPage('monitor')" style="cursor:pointer">Monitor Dashboard</span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>${symbol} Detail</span>
+      </div>
+      <div class="back-btn" onclick="showPage('monitor')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Monitor
+      </div>
+      ${bannerHtml}
+      <div class="detail-hero">
+        <div class="detail-hero-top">
+          <div>
+            <div class="detail-coin-name">${symbol}</div>
+            <div class="detail-updated" style="margin-top:3px">${c.name} · Last updated: ${c.updated} · Data freshness: <span style="color:var(--risk-normal);font-weight:600">${c.freshness}</span></div>
+          </div>
+          <div class="flex-center gap-8">
+            <div class="freshenesss-chip">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Fresh
+            </div>
+          </div>
+        </div>
+        <div class="detail-hero-metrics">
+          <div class="detail-score-block">
+            <div class="detail-score-num ${c.riskScoreClass}">${c.score}</div>
+            <div class="detail-score-label">Composite Score</div>
+          </div>
+          <div class="detail-divider"></div>
+          <div class="detail-badge-group">${extraBadges}</div>
+          <div class="detail-divider"></div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="font-weight:600;margin-bottom:6px">Score Formula</div>
+            <div style="font-family:'Fira Code',monospace;font-size:11px;color:var(--text-muted)">SPRI = (1/9) × Σ(V1…V9)</div>
+            <div style="font-family:'Fira Code',monospace;font-size:11px;color:var(--text-muted);margin-top:3px">≈ ${c.score}</div>
+          </div>
+          <div class="detail-divider"></div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px">Risk Threshold</div>
+            <div style="display:flex;flex-direction:column;gap:4px">${thresholdRows(c.currentThreshold)}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Top Risk Drivers
+            </div>
+            <span class="badge badge-gray">3 factors</span>
+          </div>
+          <div class="card-body"><div class="driver-list">${driversHtml}</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              Dimension Breakdown
+            </div>
+          </div>
+          <div class="card-body"><div class="dim-cards">${dimHtml}</div></div>
+        </div>
+      </div>
+
+      <div class="card mb-16" style="margin-bottom:20px">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Composite Score Trend — ${symbol}
+          </div>
+          <div class="tabs"><div class="tab active">7D</div><div class="tab">30D</div></div>
+        </div>
+        <div class="card-body">
+          <div class="chart-container-sm"><canvas id="detailTrendChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card mb-16" style="margin-bottom:20px">
+        <div class="card-header">
+          <div class="card-title">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Variable Drilldown
+          </div>
+          <span class="badge badge-gray">9 variables</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Variable Name</th><th>Dimension</th><th>Raw Value</th><th>Norm. Score</th><th>Updated</th><th>Status</th></tr></thead>
+            <tbody>${varRowsHtml}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="detail-2col">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Alert History
+            </div>
+          </div>
+          <div class="card-body"><div class="timeline">${alertsHtml}</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Reserve Review Status
+            </div>
+            <span class="badge ${c.reviewBadge}">${c.reviewStatus}</span>
+          </div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">Source: <strong>${c.reviewSource}</strong></div>
+            ${reviewFieldsHtml}
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+              <div style="font-size:11px;color:var(--text-muted)">${c.reviewDate}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${c.reviewedBy}</div>
+              <button class="btn btn-secondary btn-sm" style="margin-top:10px" onclick="showPage('review')">Open Review Workspace →</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // Re-create the detail trend chart
+    if (detailChartInst) { detailChartInst.destroy(); detailChartInst = null; }
+    const dCtx = document.getElementById('detailTrendChart').getContext('2d');
+    detailChartInst = new Chart(dCtx, {
+      type: 'line',
+      plugins: [riskBandPlugin],
+      data: {
+        labels,
+        datasets: [
+          { label:'Composite Score', data: c.trendData, borderColor: c.trendColor, backgroundColor: c.trendBg,
+            borderWidth:2.5, tension:0.35, fill:true, pointBackgroundColor: c.trendColor, pointRadius:3, pointHoverRadius:5 },
+          { label:'MC Dimension', data: c.trendMCData, borderColor:'#3B82F6',
+            borderWidth:1.5, borderDash:[4,3], tension:0.35, fill:false, pointRadius:2, pointHoverRadius:4, backgroundColor:'transparent' }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        interaction:{ intersect:false, mode:'index' },
+        plugins: {
+          legend:{ display:true, position:'top', labels:{ font:{size:11}, boxWidth:10, color:'#6B7280' } },
+          tooltip:{ backgroundColor:'#fff', titleColor:'#111827', bodyColor:'#6B7280', borderColor:'#E4E7EE', borderWidth:1, padding:10 }
+        },
+        scales: {
+          x:{ grid:{display:false}, ticks:{font:{size:11},color:'#9CA3AF'} },
+          y:{ min:0, max:100, grid:{color:'#F3F4F6'}, ticks:{font:{size:11},color:'#9CA3AF',stepSize:25} }
+        }
+      }
+    });
+  }
+
+  /* ════════════════════════════════════════════
+     PAGE NAVIGATION
+  ════════════════════════════════════════════ */
+  const pageIds = ['page-monitor', 'page-detail', 'page-review'];
+  const navItems = document.querySelectorAll('.nav-item');
+
+  function showPage(name, coin) {
+    // Hide all pages
+    pageIds.forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+
+    // If navigating to detail, render the correct coin
+    if (name === 'detail' && coin) renderDetail(coin);
+
+    // Topbar text
+    const titlesMap = {
+      monitor: ['Monitor Dashboard', 'Stablecoin Peg Risk Index'],
+      detail:  [coin ? coin + ' Detail' : 'Coin Detail', 'Monitor Dashboard › ' + (coin || '')],
+      review:  ['Reserve Review', 'Operations › Reserve Quality'],
+    };
+    const t = titlesMap[name];
+    document.getElementById('topbar-title').textContent = t[0];
+    document.getElementById('topbar-sub').textContent   = t[1];
+
+    // Nav highlight — detail is a sub-page of Monitor, so keep Monitor active
+    const navMap = { monitor: 0, detail: 0, review: 1 };
+    navItems.forEach((el, i) => el.classList.toggle('active', i === navMap[name]));
+    window.scrollTo(0, 0);
+  }
+
+  /* ── Variable expand/collapse (dynamic rows) ── */
+  function toggleExpandDyn(id) {
+    const row = document.getElementById(id);
+    if (row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+  }
+
+  /* ── Approve Review ── */
+  function approveReview() {
+    const toast = document.getElementById('toast');
+    toast.style.display = 'flex';
+    setTimeout(() => { toast.style.display = 'none'; }, 3500);
+  }
+
+  /* ── Monitor Trend Chart ── */
+  const trendCtx = document.getElementById('trendChart').getContext('2d');
+  const labels = ['Apr 17', 'Apr 18', 'Apr 19', 'Apr 20', 'Apr 21', 'Apr 22', 'Apr 23'];
+
+  // Risk band plugin
+  const riskBandPlugin = {
+    id: 'riskBands',
+    beforeDraw(chart) {
+      const { ctx, chartArea: { left, right, top, bottom }, scales: { y } } = chart;
+      const bands = [
+        { from: 76, to: 100, color: 'rgba(239,68,68,0.06)' },
+        { from: 51, to: 75,  color: 'rgba(249,115,22,0.06)' },
+        { from: 26, to: 50,  color: 'rgba(245,158,11,0.06)' },
+        { from: 0,  to: 25,  color: 'rgba(16,185,129,0.06)' },
+      ];
+      bands.forEach(b => {
+        const yFrom = y.getPixelForValue(b.to);
+        const yTo   = y.getPixelForValue(b.from);
+        ctx.fillStyle = b.color;
+        ctx.fillRect(left, yFrom, right - left, yTo - yFrom);
+      });
+    }
+  };
+
+  new Chart(trendCtx, {
+    type: 'line',
+    plugins: [riskBandPlugin],
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'USDT',
+          data: [32, 38, 42, 45, 52, 58, 68],
+          borderColor: '#F97316', backgroundColor: 'rgba(249,115,22,0.08)',
+          borderWidth: 2.5, tension: 0.35, fill: false,
+          pointBackgroundColor: '#F97316', pointRadius: 3, pointHoverRadius: 5,
+        },
+        {
+          label: 'USDC',
+          data: [28, 30, 35, 38, 40, 39, 41],
+          borderColor: '#F59E0B', backgroundColor: 'rgba(245,158,11,0.08)',
+          borderWidth: 2, tension: 0.35, fill: false,
+          pointBackgroundColor: '#F59E0B', pointRadius: 3, pointHoverRadius: 5,
+        },
+        {
+          label: 'PYUSD',
+          data: [18, 20, 22, 21, 23, 24, 24],
+          borderColor: '#10B981', backgroundColor: 'rgba(16,185,129,0.08)',
+          borderWidth: 2, tension: 0.35, fill: false,
+          pointBackgroundColor: '#10B981', pointRadius: 3, pointHoverRadius: 5,
+        },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#fff',
+          titleColor: '#111827', bodyColor: '#6B7280',
+          borderColor: '#E4E7EE', borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#9CA3AF' } },
+        y: {
+          min: 0, max: 100,
+          grid: { color: '#F3F4F6' },
+          ticks: { font: { size: 11 }, color: '#9CA3AF', stepSize: 25 }
+        }
+      }
+    }
+  });
+
+</script>
+</body>
+</html>

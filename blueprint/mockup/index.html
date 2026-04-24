@@ -1,0 +1,3444 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuvante Synchronisation Dashboard Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --panel: #ffffff;
+      --line: #e6ebf1;
+      --line-strong: #d8e0ea;
+      --text: #1c2432;
+      --text-soft: #6e7d92;
+      --warn-soft: #fff7e8;
+      --ok-soft: #ebfaf4;
+      --err-soft: #fff1f1;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 8px 20px rgba(15, 35, 70, 0.04);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", sans-serif;
+    }
+
+    .app {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .top h1 {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .top p {
+      margin: 8px 0 0;
+      color: var(--text-soft);
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    .mode-nav {
+      display: inline-flex;
+      border: 1px solid var(--line-strong);
+      background: var(--panel);
+      border-radius: 999px;
+      padding: 5px;
+      gap: 4px;
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+    }
+
+    .mode-nav button {
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-soft);
+      font-weight: 600;
+      font-size: 12px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    .mode-nav button.active {
+      background: #eaf4ff;
+      color: #2557c6;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .kpi .label {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #525f72;
+      min-height: 44px;
+    }
+
+    .kpi .value {
+      margin: 4px 0 0;
+      font-size: 45px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .kpi .value.currency { font-size: 47px; }
+
+    .layout-2 {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .header-row h3 {
+      margin: 0;
+      font-size: 36px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-subtitle {
+      margin: 0 0 18px;
+      color: var(--text-soft);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .chip-nav {
+      display: inline-flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip-nav button {
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: #fff;
+      color: #6b7c92;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 10px 16px;
+    }
+
+    .chip-nav button.active {
+      background: #e8fbf8;
+      color: #26a98d;
+      border-color: #b9efe4;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      font-size: 13px;
+      color: var(--text-soft);
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .field select,
+    .field input {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 0 10px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    .txn-list { display: grid; gap: 10px; }
+
+    .txn-item {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .txn-item strong {
+      display: block;
+      font-size: 27px;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+
+    .txn-item p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .status-earmarked { color: #c59427; background: var(--warn-soft); border-color: #f8dd9f; }
+    .status-complete { color: #28a37f; background: var(--ok-soft); border-color: #a8e7d4; }
+    .status-failed { color: #c45f5f; background: var(--err-soft); border-color: #f3baba; }
+    .status-active { color: #2b9f83; background: #eefcf6; border-color: #b4f0dd; }
+    .status-pending { color: #b1842f; background: #fff9ee; border-color: #f2d7a1; }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: #fff;
+      color: #2a3a50;
+      font-weight: 700;
+      font-size: 14px;
+      height: 36px;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      border-color: #9adfce;
+      background: #e8fbf8;
+      color: #238b73;
+    }
+
+    .btn.warn {
+      border-color: #f2bebe;
+      background: #fff3f3;
+      color: #bf5454;
+    }
+
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .side-stack { display: grid; gap: 10px; }
+    .accounts-list, .alerts-list { display: grid; gap: 10px; }
+
+    .acc-row {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 12px;
+      align-items: center;
+    }
+
+    .acc-row strong { font-size: 22px; }
+    .acc-row .small { color: var(--text-soft); font-size: 16px; font-weight: 600; }
+
+    .alert-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .alert-item p {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.35;
+      font-weight: 600;
+      color: #35445a;
+    }
+
+    .alert-item small {
+      color: #95a3b6;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      transform: translateY(-1px);
+    }
+    .dot-green { background: #34c997; }
+    .dot-yellow { background: #d6af37; }
+    .dot-red { background: #dc6666; }
+
+    .feedback {
+      min-height: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #7a899e;
+    }
+    .feedback.ok { color: #1fa180; }
+    .feedback.err { color: #cb5d5d; }
+
+    .timeline {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 20px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+
+    .timeline-row {
+      min-width: 1020px;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(120px, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+
+    .step { text-align: center; position: relative; }
+
+    .step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: -6px;
+      top: 22px;
+      width: 12px;
+      border-top: 2px solid #dbe4ee;
+    }
+
+    .circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      margin: 0 auto 8px;
+      border: 2px solid #ced8e4;
+      background: #fff;
+    }
+
+    .step.done .circle { border-color: #3cc5a0; background: #eafbf4; }
+    .step.current .circle { border-color: #e8be62; background: #fff8e7; }
+
+    .step b { display: block; font-size: 16px; margin-bottom: 3px; }
+    .step span { display: block; color: #7a8ba0; font-size: 12px; line-height: 1.3; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      color: #4e5d72;
+      font-weight: 600;
+    }
+    .kv:last-child { border-bottom: 0; }
+    .kv strong { color: #253349; font-size: 15px; }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .metric .caption {
+      margin: 0;
+      color: #7a889c;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .metric .num {
+      margin: 6px 0 0;
+      font-size: 39px;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+    .metric .num.orange { color: #d68f2b; }
+    .metric .num.green { color: #239f7f; }
+    .metric .num.purple { color: #5a5ece; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 14px;
+      font-size: 14px;
+      text-align: left;
+      color: #33435a;
+      font-weight: 600;
+    }
+    th {
+      font-size: 12px;
+      color: #8291a6;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #fafcfe;
+    }
+    tr:last-child td { border-bottom: 0; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+    .footer-hint {
+      margin-top: 10px;
+      color: #7e8ea3;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1080px) {
+      .top h1 { font-size: 32px; }
+      .top p { font-size: 16px; }
+      .kpi .value { font-size: 34px; }
+      .kpi .value.currency { font-size: 36px; }
+      .kpi-grid, .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layout-2, .detail-grid { grid-template-columns: 1fr; }
+      .header-row h3 { font-size: 28px; }
+      .chip-nav button { font-size: 14px; }
+      .txn-item strong { font-size: 20px; }
+      .alert-item p { font-size: 16px; }
+    }
+
+    @media (max-width: 760px) {
+      .app { padding: 14px; }
+      .top { flex-direction: column; }
+      .form-grid { grid-template-columns: 1fr; }
+      .kpi-grid, .metric-grid { grid-template-columns: 1fr; }
+      .txn-item { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div>
+        <h1>Synchronisation Dashboard</h1>
+        <p>Use Case 1 — Stablecoin Clearing (Issuer A ↔ Issuer B) · Model 1</p>
+      </div>
+      <nav class="mode-nav" aria-label="页面切换">
+        <button class="active" data-page="member">Member</button>
+        <button data-page="detail">Transaction</button>
+        <button data-page="issuer">Issuer</button>
+        <button data-page="admin">Admin</button>
+        <button data-page="audit">Audit</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page active" id="page-member">
+        <div class="kpi-grid">
+          <article class="card kpi"><p class="label">Active Swaps</p><p class="value" id="activeSwaps">1</p></article>
+          <article class="card kpi"><p class="label">Settled Today</p><p class="value">1</p></article>
+          <article class="card kpi"><p class="label">Failed / Cancelled</p><p class="value">1</p></article>
+          <article class="card kpi"><p class="label">Total Volume (GBP)</p><p class="value currency">£850,000</p></article>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;">
+          <div class="header-row" style="margin-bottom:8px;"><h3 style="font-size:22px; margin:0;">Create New Instruction</h3></div>
+          <form id="instructionForm" class="form-grid">
+            <div class="field"><label for="type">Txn Type</label><select id="type"><option value="Swap">GBPA → GBPB Swap</option><option value="Redeem">Stablecoin → Fiat Redeem</option></select></div>
+            <div class="field"><label for="from">From</label><select id="from"><option>GBPA</option><option>GBPB</option></select></div>
+            <div class="field"><label for="to">To</label><select id="to"><option>GBPB</option><option>GBPA</option><option>GBP (fiat)</option></select></div>
+            <div class="field"><label for="amount">Amount (GBP)</label><input id="amount" inputmode="numeric" placeholder="250000"></div>
+            <div class="field"><label>&nbsp;</label><button class="btn primary" type="submit">Submit</button></div>
+          </form>
+          <div class="feedback" id="memberFeedback"></div>
+        </div>
+
+        <div class="layout-2">
+          <section class="card">
+            <div class="header-row">
+              <h3>Recent Transactions</h3>
+              <div class="chip-nav"><button class="active">All</button><button>Active</button><button>Settled</button><button>Failed</button></div>
+            </div>
+            <div class="txn-list" id="txnList"></div>
+          </section>
+
+          <aside class="side-stack">
+            <section class="card">
+              <h3 style="margin:0 0 10px; font-size:20px;">RTGS Accounts</h3>
+              <div class="accounts-list">
+                <article class="acc-row">
+                  <div><strong>Issuer A (GBPA)</strong><div class="small">109999-12345678</div></div>
+                  <div style="text-align:right;"><strong>£1,500,000.00</strong><br><span class="badge status-active">ACTIVE</span></div>
+                </article>
+                <article class="acc-row">
+                  <div><strong>Issuer B (GBPB)</strong><div class="small">109999-87654321</div></div>
+                  <div style="text-align:right;"><strong>£2,100,000.00</strong><br><span class="badge status-active">ACTIVE</span></div>
+                </article>
+              </div>
+            </section>
+
+            <section class="card">
+              <h3 style="margin:0 0 10px; font-size:20px;">Activity & Alerts</h3>
+              <div class="alerts-list">
+                <article class="alert-item"><p><span class="dot dot-green"></span>Swap settled: GBPB → GBPA, £100k. Inbound stablecoin burned.</p><small>08:46</small></article>
+                <article class="alert-item"><p><span class="dot dot-yellow"></span>Earmark confirmed for swap-7a3f01</p><small>09:13</small></article>
+                <article class="alert-item"><p><span class="dot dot-red"></span>Swap failed: no RTGS liquidity for £500k</p><small>07:45</small></article>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" id="page-detail">
+        <section class="card" style="margin-bottom:12px;">
+          <div class="header-row">
+            <h3>Transaction <span id="detailTitleId">swap-7a3f01</span></h3>
+            <div style="display:flex; gap:8px;">
+              <span class="badge status-earmarked" id="detailStatusBadge">EARMARKED</span>
+              <span class="badge" style="background:#f2f5fa; border-color:#dfe6ef; color:#72829a;">SCENARIO 1A</span>
+            </div>
+          </div>
+          <p class="section-subtitle" style="margin-bottom:12px;">Institutional Client A</p>
+          <div class="timeline" id="timelineContainer"></div>
+        </section>
+
+        <div class="detail-grid">
+          <section class="card">
+            <h3 style="margin:0 0 10px; font-size:24px;">On-Chain Leg</h3>
+            <div class="kv"><span>From Token</span><strong>GBPA (Stellar)</strong></div>
+            <div class="kv"><span>To Token</span><strong>GBPB (Stellar)</strong></div>
+            <div class="kv"><span>Amount</span><strong id="detailAmount">£250,000.00</strong></div>
+            <div class="kv"><span>Inbound Wallet</span><strong class="mono">GCFX...Q7KA</strong></div>
+            <div class="kv"><span>SO Escrow</span><strong class="mono">GDS0...NV3E</strong></div>
+            <div class="kv"><span>Outbound Wallet</span><strong class="mono">0xA1...F39C</strong></div>
+            <div class="kv"><span>Asset Status</span><strong><span class="badge status-earmarked">ASSET_LOCKED</span></strong></div>
+          </section>
+
+          <section class="card">
+            <h3 style="margin:0 0 10px; font-size:24px;">RTGS Leg (RT2)</h3>
+            <div class="kv"><span>Debit</span><strong>Issuer A (109999-12345678)</strong></div>
+            <div class="kv"><span>Credit</span><strong>Issuer B (109999-87654321)</strong></div>
+            <div class="kv"><span>Instruction ID</span><strong class="mono">56e87cb3-835e-4e73</strong></div>
+            <div class="kv"><span>Message ID (latest)</span><strong class="mono">e70af32d-98e3-49aa</strong></div>
+            <div class="kv"><span>Clearing System</span><strong>NUVA</strong></div>
+            <div class="kv"><span>RTGS Status</span><strong><span class="badge status-earmarked" id="rtgsStatus">EARMARKED</span></strong></div>
+          </section>
+        </div>
+
+        <section class="card">
+          <div class="header-row" style="margin-bottom:0;">
+            <div>
+              <h3 style="font-size:20px;">Instruction Controls</h3>
+              <p class="section-subtitle" style="margin:6px 0 0;">Settlement 前允许取消，Settlement 后禁用取消。</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn warn" id="cancelDetailBtn">Cancel Transaction</button>
+              <button class="btn" id="jumpMemberBtn">Back To List</button>
+            </div>
+          </div>
+          <div class="feedback" id="detailFeedback"></div>
+        </section>
+      </section>
+
+      <section class="page" id="page-issuer">
+        <section class="card" style="margin-bottom:12px;">
+          <div class="header-row"><h3>Issuer A (GBPA)</h3><button class="btn">Close</button></div>
+          <p class="section-subtitle">Sort: 109999 · Acct: 12345678</p>
+          <div class="metric-grid">
+            <article class="card metric" style="padding:14px;"><p class="caption">CURRENT BALANCE</p><p class="num">£2.0M</p></article>
+            <article class="card metric" style="padding:14px;"><p class="caption">BALANCE REQUESTED</p><p class="num orange">£1.0M</p></article>
+            <article class="card metric" style="padding:14px;"><p class="caption">BALANCE REMAINING</p><p class="num green">£1.0M</p></article>
+            <article class="card metric" style="padding:14px;"><p class="caption">RESERVE REQUIRED</p><p class="num purple">£500K</p></article>
+          </div>
+          <div class="card" style="padding:14px;">
+            <h4 style="margin:0 0 8px; font-size:18px;">Balance History (Last 24 Hours)</h4>
+            <canvas id="issuerChart" height="110"></canvas>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3 style="margin:0 0 10px;">Swap History</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Time</th><th>Description</th><th>Counterparty</th><th>Amount</th><th>Status</th><th>Tx ID</th></tr></thead>
+              <tbody id="issuerHistoryBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="page-admin">
+        <section class="card">
+          <div class="header-row">
+            <h3>Operations Control Board</h3>
+            <div style="display:flex; gap:8px;">
+              <button class="btn">Filter Member</button>
+              <button class="btn">Filter Status</button>
+              <button class="btn warn" id="pauseBtn">Pause Selected</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Sel</th><th>ID</th><th>Member</th><th>Type</th><th>Status</th><th>Amount</th><th>Updated</th></tr></thead>
+              <tbody id="adminBody"></tbody>
+            </table>
+          </div>
+          <div class="feedback" id="adminFeedback"></div>
+        </section>
+      </section>
+
+      <section class="page" id="page-audit">
+        <section class="card">
+          <h3 style="margin:0; font-size:40px;">Audit Log</h3>
+          <p class="section-subtitle">Immutable record of all orchestration events</p>
+          <div class="form-grid" style="margin-top:0;">
+            <div class="field"><label for="fActor">Actor</label><input id="fActor" placeholder="System / Member / Admin"></div>
+            <div class="field"><label for="fEvent">Event</label><input id="fEvent" placeholder="EARMARK / CANCEL / FINALIZED"></div>
+            <div class="field"><label for="fRef">Reference</label><input id="fRef" placeholder="swap-7a3f01"></div>
+            <div class="field"><label>&nbsp;</label><button class="btn primary" id="applyAuditFilter">Apply Filter</button></div>
+            <div class="field"><label>&nbsp;</label><button class="btn" id="clearAuditFilter">Clear</button></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Time</th><th>Event</th><th>Reference</th><th>Detail</th></tr></thead>
+              <tbody id="auditBody"></tbody>
+            </table>
+          </div>
+          <div class="feedback" id="auditFeedback"></div>
+          <div class="footer-hint">
+            <span>RTGS (Synchro Lab): <b style="color:#1fa27f;">Connected</b></span>
+            <span>On-Chain: <b style="color:#1fa27f;">Operational</b></span>
+            <span>Model: <b>1 (SO-initiated)</b></span>
+            <span>© 2026 Nuvante · BoE Synchronisation Lab · Cohort B</span>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      txns: [
+        { id: "swap-7a3f01", pair: "GBPA → GBPB", client: "Institutional Client A", amount: 250000, status: "EARMARKED", badge: "status-earmarked", note: "Scenario 1A", cancellable: true, timelineStep: 2 },
+        { id: "swap-4b2e09", pair: "GBPB → GBPA", client: "Institutional Client B", amount: 100000, status: "COMPLETE", badge: "status-complete", note: "Scenario 1A", cancellable: false, timelineStep: 6 },
+        { id: "swap-9c1d77", pair: "GBPA → GBPB", client: "Institutional Client C", amount: 500000, status: "FAILED NO LIQUIDITY", badge: "status-failed", note: "Scenario 1B", cancellable: false, timelineStep: 2 }
+      ],
+      selectedId: "swap-7a3f01",
+      issuerHistory: [
+        { time: "2026-04-19 14:23:01", desc: "GBPA → GBPB swap (pending)", cp: "Issuer B", amount: "-£1,000,000.00", status: "Pending", txid: "c93a17" },
+        { time: "2026-04-19 13:30:44", desc: "GBPA → GBPB swap", cp: "Issuer B", amount: "-£200,000.00", status: "Completed", txid: "b47f82" },
+        { time: "2026-04-19 09:15:22", desc: "GBPA → GBPB swap", cp: "Issuer B", amount: "-£300,000.00", status: "Completed", txid: "a12e09" }
+      ],
+      audit: [
+        { time: "09:13:02", actor: "System", event: "EARMARK_CONFIRMED", ref: "swap-7a3f01", detail: "Transaction earmarked, funds reserved", cls: "status-earmarked" },
+        { time: "09:12:47", actor: "System", event: "EARMARK_REQUESTED", ref: "swap-7a3f01", detail: "Multilateral Settlement Message sent to BoE", cls: "status-earmarked" },
+        { time: "09:12:45", actor: "System", event: "ASSET_LOCKED", ref: "swap-7a3f01", detail: "GBPA escrowed in SO wallet GDS0...NV3E", cls: "status-earmarked" },
+        { time: "09:12:34", actor: "System", event: "KYT_PASSED", ref: "swap-7a3f01", detail: "KYT/risk checks passed", cls: "status-complete" },
+        { time: "09:12:33", actor: "Member", event: "SWAP_INITIATED", ref: "swap-7a3f01", detail: "Client A requested GBPA → GBPB swap, £250,000", cls: "status-earmarked" },
+        { time: "08:46:10", actor: "System", event: "FINALIZED", ref: "swap-4b2e09", detail: "Outbound Stablecoin released to OxD4...8B2F", cls: "status-complete" },
+        { time: "08:45:52", actor: "System", event: "RTGS_SETTLED", ref: "swap-4b2e09", detail: "Modify transaction processed, settlement confirmed", cls: "status-complete" },
+        { time: "07:45:35", actor: "System", event: "ASSET_RETURNED", ref: "swap-9c1d77", detail: "GBPA returned to Client C wallet", cls: "status-failed" },
+        { time: "07:45:20", actor: "Admin", event: "EARMARK_CANCELLED", ref: "swap-9c1d77", detail: "Cancel transaction: SVNR (no liquidity)", cls: "status-failed" }
+      ]
+    };
+
+    const timelineSteps = ["Initiated", "Asset Locked", "Earmarked", "Pre-mint OK", "Settled", "Burn", "Finalized"];
+    const qs = (s) => document.querySelector(s);
+
+    function toMoney(num) { return `£${Number(num).toLocaleString()}.00`; }
+
+    function renderTxnList() {
+      const list = qs("#txnList");
+      list.innerHTML = "";
+      state.txns.forEach((txn) => {
+        const row = document.createElement("article");
+        row.className = "txn-item";
+        row.innerHTML = `
+          <div>
+            <strong>${txn.pair}</strong>
+            <p>${txn.client} · ${toMoney(txn.amount)}</p>
+          </div>
+          <div>
+            <span class="badge ${txn.badge}">${txn.status}</span>
+            <p style="margin:4px 0 0; text-align:right; font-size:13px; color:#8ea0b8;">${txn.note}</p>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn" data-action="view" data-id="${txn.id}">View</button>
+            <button class="btn warn" data-action="cancel" data-id="${txn.id}" ${txn.cancellable ? "" : "disabled"}>Cancel</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+      qs("#activeSwaps").textContent = String(state.txns.filter((t) => t.cancellable).length);
+    }
+
+    function renderTimeline() {
+      const current = state.txns.find((t) => t.id === state.selectedId) || state.txns[0];
+      const container = qs("#timelineContainer");
+      container.innerHTML = "";
+      const row = document.createElement("div");
+      row.className = "timeline-row";
+      timelineSteps.forEach((name, idx) => {
+        const cls = idx < current.timelineStep ? "done" : idx === current.timelineStep ? "current" : "";
+        const el = document.createElement("div");
+        el.className = `step ${cls}`;
+        el.innerHTML = `<div class="circle"></div><b>${name}</b><span>${idx === current.timelineStep ? "Current step" : idx < current.timelineStep ? "Completed" : "Pending"}</span>`;
+        row.appendChild(el);
+      });
+      container.appendChild(row);
+      qs("#detailTitleId").textContent = current.id;
+      qs("#detailAmount").textContent = toMoney(current.amount);
+      qs("#detailStatusBadge").textContent = current.status;
+      qs("#detailStatusBadge").className = `badge ${current.badge}`;
+      qs("#rtgsStatus").textContent = current.status.includes("FAILED") ? "FAILED" : current.status;
+      qs("#cancelDetailBtn").disabled = !current.cancellable;
+    }
+
+    function renderIssuerHistory() {
+      const body = qs("#issuerHistoryBody");
+      body.innerHTML = "";
+      state.issuerHistory.forEach((h) => {
+        const cls = h.status === "Completed" ? "status-complete" : "status-pending";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${h.time}</td><td>${h.desc}</td><td>${h.cp}</td><td style="color:#ce6666;">${h.amount}</td><td><span class="badge ${cls}">${h.status}</span></td><td class="mono">${h.txid}</td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAdmin() {
+      const body = qs("#adminBody");
+      body.innerHTML = "";
+      state.txns.forEach((txn) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td><input type="checkbox" data-id="${txn.id}"></td><td class="mono">${txn.id}</td><td>${txn.client}</td><td>${txn.pair}</td><td><span class="badge ${txn.badge}">${txn.status}</span></td><td>${toMoney(txn.amount)}</td><td>${txn.id === "swap-7a3f01" ? "09:13:02" : txn.id === "swap-4b2e09" ? "08:46:10" : "07:45:35"}</td>`;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAudit(list = state.audit) {
+      const body = qs("#auditBody");
+      body.innerHTML = "";
+      list.forEach((a) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${a.time}</td><td><span class="badge ${a.cls}">${a.event}</span></td><td class="mono">${a.ref}</td><td>${a.detail}</td>`;
+        body.appendChild(tr);
+      });
+      qs("#auditFeedback").textContent = `当前显示 ${list.length} 条日志`;
+    }
+
+    function initChart() {
+      const ctx = qs("#issuerChart");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["00:00", "04:00", "08:00", "09:16", "12:00", "13:31", "14:23", "Now"],
+          datasets: [
+            { label: "Account Balance", data: [2.5, 2.5, 2.5, 2.2, 2.2, 2.0, 2.0, 1.0], borderColor: "#5b76e7", backgroundColor: "rgba(91,118,231,0.08)", stepped: true, fill: true, borderWidth: 2 },
+            { label: "Reserve Threshold (£500K)", data: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], borderColor: "#e37f7f", borderDash: [6, 4], pointRadius: 0, borderWidth: 2 }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } },
+          scales: {
+            y: { min: 0, max: 2.8, ticks: { callback: (value) => `£${value}M` }, grid: { color: "#edf1f6" } },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll(".mode-nav button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const page = button.dataset.page;
+        document.querySelectorAll(".mode-nav button").forEach((b) => b.classList.remove("active"));
+        button.classList.add("active");
+        document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+        qs(`#page-${page}`).classList.add("active");
+      });
+    });
+
+    qs("#instructionForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const feedback = qs("#memberFeedback");
+      const amount = Number(qs("#amount").value);
+      const from = qs("#from").value;
+      const to = qs("#to").value;
+      if (!amount || amount <= 0) {
+        feedback.className = "feedback err";
+        feedback.textContent = "请输入合法金额。";
+        return;
+      }
+      if (amount > 1200000) {
+        feedback.className = "feedback err";
+        feedback.textContent = "余额不足，无法提交该交易。";
+        return;
+      }
+      const id = `swap-${Math.random().toString(16).slice(2, 8)}`;
+      state.txns.unshift({ id, pair: `${from} → ${to.replace(" (fiat)", "")}`, client: "Institutional Client A", amount, status: "EARMARKED", badge: "status-earmarked", note: "Scenario 1A", cancellable: true, timelineStep: 2 });
+      state.audit.unshift({ time: new Date().toTimeString().slice(0, 8), actor: "Member", event: "SWAP_INITIATED", ref: id, detail: `New instruction submitted: ${from} -> ${to}, ${toMoney(amount)}`, cls: "status-earmarked" });
+      feedback.className = "feedback ok";
+      feedback.textContent = `提交成功，Instruction ID: ${id}`;
+      qs("#amount").value = "";
+      renderTxnList();
+      renderAdmin();
+      renderAudit();
+    });
+
+    qs("#txnList").addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.dataset.action;
+      const id = target.dataset.id;
+      if (!action || !id) return;
+      const txn = state.txns.find((t) => t.id === id);
+      if (!txn) return;
+      if (action === "view") {
+        state.selectedId = id;
+        renderTimeline();
+        document.querySelectorAll(".mode-nav button").forEach((b) => b.classList.remove("active"));
+        qs('.mode-nav button[data-page="detail"]').classList.add("active");
+        document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+        qs("#page-detail").classList.add("active");
+      }
+      if (action === "cancel") {
+        const feedback = qs("#memberFeedback");
+        if (!txn.cancellable) {
+          feedback.className = "feedback err";
+          feedback.textContent = "当前状态不可取消。";
+          return;
+        }
+        txn.cancellable = false;
+        txn.status = "FAILED NO LIQUIDITY";
+        txn.badge = "status-failed";
+        txn.note = "Cancelled";
+        txn.timelineStep = 2;
+        state.audit.unshift({ time: new Date().toTimeString().slice(0, 8), actor: "Member", event: "EARMARK_CANCELLED", ref: txn.id, detail: "Cancelled before settlement boundary.", cls: "status-failed" });
+        feedback.className = "feedback ok";
+        feedback.textContent = `${txn.id} 已取消。`;
+        renderTxnList();
+        renderAdmin();
+        renderAudit();
+      }
+    });
+
+    qs("#cancelDetailBtn").addEventListener("click", () => {
+      const feedback = qs("#detailFeedback");
+      const txn = state.txns.find((t) => t.id === state.selectedId);
+      if (!txn) return;
+      if (!txn.cancellable) {
+        feedback.className = "feedback err";
+        feedback.textContent = "Settlement 后不可取消。";
+        return;
+      }
+      txn.cancellable = false;
+      txn.status = "FAILED NO LIQUIDITY";
+      txn.badge = "status-failed";
+      txn.note = "Cancelled";
+      state.audit.unshift({ time: new Date().toTimeString().slice(0, 8), actor: "Member", event: "ASSET_RETURNED", ref: txn.id, detail: "Cancelled from transaction detail, asset returned.", cls: "status-failed" });
+      feedback.className = "feedback ok";
+      feedback.textContent = "取消成功，状态已写入审计日志。";
+      renderTxnList();
+      renderTimeline();
+      renderAdmin();
+      renderAudit();
+    });
+
+    qs("#jumpMemberBtn").addEventListener("click", () => {
+      document.querySelectorAll(".mode-nav button").forEach((b) => b.classList.remove("active"));
+      qs('.mode-nav button[data-page="member"]').classList.add("active");
+      document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+      qs("#page-member").classList.add("active");
+    });
+
+    qs("#pauseBtn").addEventListener("click", () => {
+      const selected = [...document.querySelectorAll('#adminBody input[type="checkbox"]:checked')].map((cb) => cb.dataset.id);
+      const feedback = qs("#adminFeedback");
+      if (selected.length === 0) {
+        feedback.className = "feedback err";
+        feedback.textContent = "请先选择要 Pause 的交易。";
+        return;
+      }
+      selected.forEach((id) => {
+        const txn = state.txns.find((t) => t.id === id);
+        if (!txn) return;
+        txn.status = "EARMARKED";
+        txn.badge = "status-earmarked";
+        txn.note = "Paused by admin";
+        state.audit.unshift({ time: new Date().toTimeString().slice(0, 8), actor: "Admin", event: "PAUSE_APPLIED", ref: id, detail: "Transaction paused and retained in earmarked queue.", cls: "status-earmarked" });
+      });
+      feedback.className = "feedback ok";
+      feedback.textContent = `已暂停 ${selected.length} 条交易。`;
+      renderTxnList();
+      renderAdmin();
+      renderAudit();
+      renderTimeline();
+    });
+
+    qs("#applyAuditFilter").addEventListener("click", () => {
+      const actor = qs("#fActor").value.trim().toLowerCase();
+      const event = qs("#fEvent").value.trim().toLowerCase();
+      const ref = qs("#fRef").value.trim().toLowerCase();
+      const filtered = state.audit.filter((row) => {
+        const actorOk = !actor || row.actor.toLowerCase().includes(actor);
+        const eventOk = !event || row.event.toLowerCase().includes(event);
+        const refOk = !ref || row.ref.toLowerCase().includes(ref);
+        return actorOk && eventOk && refOk;
+      });
+      renderAudit(filtered);
+    });
+
+    qs("#clearAuditFilter").addEventListener("click", () => {
+      qs("#fActor").value = "";
+      qs("#fEvent").value = "";
+      qs("#fRef").value = "";
+      renderAudit();
+    });
+
+    renderTxnList();
+    renderTimeline();
+    renderIssuerHistory();
+    renderAdmin();
+    renderAudit();
+    initChart();
+  </script>
+</body>
+</html>
+<!--
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuvante Synchronisation Dashboard Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --panel: #ffffff;
+      --panel-soft: #fbfcfd;
+      --line: #e6ebf1;
+      --line-strong: #d8e0ea;
+      --text: #1c2432;
+      --text-soft: #6e7d92;
+      --brand: #1f9f7a;
+      --brand-soft: #e8f8f2;
+      --warn: #f1b84b;
+      --warn-soft: #fff7e8;
+      --err: #ee7676;
+      --err-soft: #fff1f1;
+      --ok: #2ebf93;
+      --ok-soft: #ebfaf4;
+      --blue: #5b76e7;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --shadow: 0 8px 20px rgba(15, 35, 70, 0.04);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Inter", sans-serif;
+    }
+
+    .app {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .top h1 {
+      margin: 0;
+      font-size: 42px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .top p {
+      margin: 8px 0 0;
+      color: var(--text-soft);
+      font-size: 19px;
+      font-weight: 600;
+    }
+
+    .mode-nav {
+      display: inline-flex;
+      border: 1px solid var(--line-strong);
+      background: var(--panel);
+      border-radius: 999px;
+      padding: 5px;
+      gap: 4px;
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .mode-nav button {
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-soft);
+      font-weight: 600;
+      font-size: 12px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: all 160ms ease;
+    }
+
+    .mode-nav button.active {
+      background: #eaf4ff;
+      color: #2557c6;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .kpi .label {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: #525f72;
+      min-height: 44px;
+    }
+
+    .kpi .value {
+      margin: 4px 0 0;
+      font-size: 45px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .kpi .value.currency { font-size: 47px; }
+
+    .layout-2 {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 38px;
+      letter-spacing: -0.02em;
+    }
+
+    .section-subtitle {
+      margin: 0 0 18px;
+      color: var(--text-soft);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .header-row h3 {
+      margin: 0;
+      font-size: 36px;
+      letter-spacing: -0.02em;
+    }
+
+    .chip-nav {
+      display: inline-flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip-nav button {
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: #fff;
+      color: #6b7c92;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 10px 16px;
+      transition: all 160ms ease;
+    }
+
+    .chip-nav button.active {
+      background: #e8fbf8;
+      color: #26a98d;
+      border-color: #b9efe4;
+    }
+
+    .txn-list { display: grid; gap: 10px; }
+
+    .txn-item {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .txn-item strong {
+      display: block;
+      font-size: 27px;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+
+    .txn-item p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .status-earmarked { color: #c59427; background: var(--warn-soft); border-color: #f8dd9f; }
+    .status-complete { color: #28a37f; background: var(--ok-soft); border-color: #a8e7d4; }
+    .status-failed { color: #c45f5f; background: var(--err-soft); border-color: #f3baba; }
+    .status-active { color: #2b9f83; background: #eefcf6; border-color: #b4f0dd; }
+    .status-pending { color: #b1842f; background: #fff9ee; border-color: #f2d7a1; }
+
+    .row-action {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn {
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      background: #fff;
+      color: #2a3a50;
+      font-weight: 700;
+      font-size: 14px;
+      height: 36px;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      border-color: #9adfce;
+      background: #e8fbf8;
+      color: #238b73;
+    }
+
+    .btn.warn {
+      border-color: #f2bebe;
+      background: #fff3f3;
+      color: #bf5454;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .side-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .accounts-list,
+    .alerts-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .acc-row {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 12px;
+      align-items: center;
+    }
+
+    .acc-row strong { font-size: 22px; }
+    .acc-row .small { color: var(--text-soft); font-size: 16px; font-weight: 600; }
+
+    .alert-item {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .alert-item p {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.35;
+      font-weight: 600;
+      color: #35445a;
+    }
+
+    .alert-item small {
+      color: #95a3b6;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      transform: translateY(-1px);
+    }
+
+    .dot-green { background: #34c997; }
+    .dot-yellow { background: #d6af37; }
+    .dot-red { background: #dc6666; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      font-size: 13px;
+      color: var(--text-soft);
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .field select,
+    .field input {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 10px;
+      padding: 0 10px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    .feedback {
+      min-height: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #7a899e;
+    }
+
+    .feedback.ok { color: #1fa180; }
+    .feedback.err { color: #cb5d5d; }
+
+    .timeline {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 20px;
+      overflow-x: auto;
+      margin-bottom: 12px;
+    }
+
+    .timeline-row {
+      min-width: 1020px;
+      display: grid;
+      grid-template-columns: repeat(7, minmax(120px, 1fr));
+      gap: 10px;
+      align-items: start;
+    }
+
+    .step {
+      text-align: center;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      right: -6px;
+      top: 22px;
+      width: 12px;
+      border-top: 2px solid #dbe4ee;
+    }
+
+    .circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      margin: 0 auto 8px;
+      border: 2px solid #ced8e4;
+      background: #fff;
+    }
+
+    .step.done .circle { border-color: #3cc5a0; background: #eafbf4; }
+    .step.current .circle { border-color: #e8be62; background: #fff8e7; }
+
+    .step b {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 3px;
+    }
+
+    .step span {
+      display: block;
+      color: #7a8ba0;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      color: #4e5d72;
+      font-weight: 600;
+    }
+
+    .kv:last-child { border-bottom: 0; }
+    .kv strong { color: #253349; font-size: 15px; }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .metric .caption {
+      margin: 0;
+      color: #7a889c;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .metric .num {
+      margin: 6px 0 0;
+      font-size: 39px;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+
+    .metric .num.orange { color: #d68f2b; }
+    .metric .num.green { color: #239f7f; }
+    .metric .num.purple { color: #5a5ece; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px 14px;
+      font-size: 14px;
+      text-align: left;
+      color: #33435a;
+      font-weight: 600;
+    }
+
+    th {
+      font-size: 12px;
+      color: #8291a6;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: #fafcfe;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+    .footer-hint {
+      margin-top: 10px;
+      color: #7e8ea3;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1080px) {
+      .top h1 { font-size: 32px; }
+      .top p { font-size: 16px; }
+      .kpi .value { font-size: 34px; }
+      .kpi .value.currency { font-size: 36px; }
+      .kpi-grid, .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .layout-2, .detail-grid { grid-template-columns: 1fr; }
+      .header-row h3 { font-size: 28px; }
+      .chip-nav button { font-size: 14px; }
+      .txn-item strong { font-size: 20px; }
+      .alert-item p { font-size: 16px; }
+    }
+
+    @media (max-width: 760px) {
+      .app { padding: 14px; }
+      .top { flex-direction: column; }
+      .form-grid { grid-template-columns: 1fr; }
+      .kpi-grid, .metric-grid { grid-template-columns: 1fr; }
+      .txn-item { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div>
+        <h1>Synchronisation Dashboard</h1>
+        <p>Use Case 1 — Stablecoin Clearing (Issuer A ↔ Issuer B) · Model 1</p>
+      </div>
+      <nav class="mode-nav" aria-label="页面切换">
+        <button class="active" data-page="member">Member</button>
+        <button data-page="detail">Transaction</button>
+        <button data-page="issuer">Issuer</button>
+        <button data-page="admin">Admin</button>
+        <button data-page="audit">Audit</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page active" id="page-member">
+        <div class="kpi-grid">
+          <article class="card kpi">
+            <p class="label">Active Swaps</p>
+            <p class="value" id="activeSwaps">1</p>
+          </article>
+          <article class="card kpi">
+            <p class="label">Settled Today</p>
+            <p class="value">1</p>
+          </article>
+          <article class="card kpi">
+            <p class="label">Failed / Cancelled</p>
+            <p class="value">1</p>
+          </article>
+          <article class="card kpi">
+            <p class="label">Total Volume (GBP)</p>
+            <p class="value currency">£850,000</p>
+          </article>
+        </div>
+
+        <div class="card" style="margin-bottom: 14px;">
+          <div class="header-row" style="margin-bottom:8px;">
+            <h3 style="font-size:22px; margin:0;">Create New Instruction</h3>
+          </div>
+          <form id="instructionForm" class="form-grid">
+            <div class="field">
+              <label for="type">Txn Type</label>
+              <select id="type">
+                <option value="Swap">GBPA → GBPB Swap</option>
+                <option value="Redeem">Stablecoin → Fiat Redeem</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="from">From</label>
+              <select id="from">
+                <option>GBPA</option>
+                <option>GBPB</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="to">To</label>
+              <select id="to">
+                <option>GBPB</option>
+                <option>GBPA</option>
+                <option>GBP (fiat)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="amount">Amount (GBP)</label>
+              <input id="amount" inputmode="numeric" placeholder="250000">
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button class="btn primary" type="submit">Submit</button>
+            </div>
+          </form>
+          <div class="feedback" id="memberFeedback"></div>
+        </div>
+
+        <div class="layout-2">
+          <section class="card">
+            <div class="header-row">
+              <h3>Recent Transactions</h3>
+              <div class="chip-nav">
+                <button class="active">All</button>
+                <button>Active</button>
+                <button>Settled</button>
+                <button>Failed</button>
+              </div>
+            </div>
+            <div class="txn-list" id="txnList"></div>
+          </section>
+
+          <aside class="side-stack">
+            <section class="card">
+              <h3 style="margin:0 0 10px; font-size:20px;">RTGS Accounts</h3>
+              <div class="accounts-list">
+                <article class="acc-row">
+                  <div>
+                    <strong>Issuer A (GBPA)</strong>
+                    <div class="small">109999-12345678</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <strong>£1,500,000.00</strong><br>
+                    <span class="badge status-active">ACTIVE</span>
+                  </div>
+                </article>
+                <article class="acc-row">
+                  <div>
+                    <strong>Issuer B (GBPB)</strong>
+                    <div class="small">109999-87654321</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <strong>£2,100,000.00</strong><br>
+                    <span class="badge status-active">ACTIVE</span>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <section class="card">
+              <h3 style="margin:0 0 10px; font-size:20px;">Activity & Alerts</h3>
+              <div class="alerts-list">
+                <article class="alert-item">
+                  <p><span class="dot dot-green"></span>Swap settled: GBPB → GBPA, £100k. Inbound stablecoin burned.</p>
+                  <small>08:46</small>
+                </article>
+                <article class="alert-item">
+                  <p><span class="dot dot-yellow"></span>Earmark confirmed for swap-7a3f01</p>
+                  <small>09:13</small>
+                </article>
+                <article class="alert-item">
+                  <p><span class="dot dot-red"></span>Swap failed: no RTGS liquidity for £500k</p>
+                  <small>07:45</small>
+                </article>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" id="page-detail">
+        <section class="card" style="margin-bottom:12px;">
+          <div class="header-row">
+            <h3>Transaction <span id="detailTitleId">swap-7a3f01</span></h3>
+            <div style="display:flex; gap:8px;">
+              <span class="badge status-earmarked" id="detailStatusBadge">EARMARKED</span>
+              <span class="badge" style="background:#f2f5fa; border-color:#dfe6ef; color:#72829a;">SCENARIO 1A</span>
+            </div>
+          </div>
+          <p class="section-subtitle" style="margin-bottom:12px;">Institutional Client A</p>
+          <div class="timeline" id="timelineContainer"></div>
+        </section>
+
+        <div class="detail-grid">
+          <section class="card">
+            <h3 style="margin:0 0 10px; font-size:24px;">On-Chain Leg</h3>
+            <div class="kv"><span>From Token</span><strong>GBPA (Stellar)</strong></div>
+            <div class="kv"><span>To Token</span><strong>GBPB (Stellar)</strong></div>
+            <div class="kv"><span>Amount</span><strong id="detailAmount">£250,000.00</strong></div>
+            <div class="kv"><span>Inbound Wallet</span><strong class="mono">GCFX...Q7KA</strong></div>
+            <div class="kv"><span>SO Escrow</span><strong class="mono">GDS0...NV3E</strong></div>
+            <div class="kv"><span>Outbound Wallet</span><strong class="mono">0xA1...F39C</strong></div>
+            <div class="kv"><span>Asset Status</span><strong><span class="badge status-earmarked">ASSET_LOCKED</span></strong></div>
+          </section>
+
+          <section class="card">
+            <h3 style="margin:0 0 10px; font-size:24px;">RTGS Leg (RT2)</h3>
+            <div class="kv"><span>Debit</span><strong>Issuer A (109999-12345678)</strong></div>
+            <div class="kv"><span>Credit</span><strong>Issuer B (109999-87654321)</strong></div>
+            <div class="kv"><span>Instruction ID</span><strong class="mono">56e87cb3-835e-4e73</strong></div>
+            <div class="kv"><span>Message ID (latest)</span><strong class="mono">e70af32d-98e3-49aa</strong></div>
+            <div class="kv"><span>Clearing System</span><strong>NUVA</strong></div>
+            <div class="kv"><span>RTGS Status</span><strong><span class="badge status-earmarked" id="rtgsStatus">EARMARKED</span></strong></div>
+          </section>
+        </div>
+
+        <section class="card">
+          <div class="header-row" style="margin-bottom:0;">
+            <div>
+              <h3 style="font-size:20px;">Instruction Controls</h3>
+              <p class="section-subtitle" style="margin:6px 0 0;">Settlement 前允许取消，Settlement 后禁用取消。</p>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn warn" id="cancelDetailBtn">Cancel Transaction</button>
+              <button class="btn" id="jumpMemberBtn">Back To List</button>
+            </div>
+          </div>
+          <div class="feedback" id="detailFeedback"></div>
+        </section>
+      </section>
+
+      <section class="page" id="page-issuer">
+        <section class="card" style="margin-bottom:12px;">
+          <div class="header-row">
+            <h3>Issuer A (GBPA)</h3>
+            <button class="btn">Close</button>
+          </div>
+          <p class="section-subtitle">Sort: 109999 · Acct: 12345678</p>
+          <div class="metric-grid">
+            <article class="card metric" style="padding:14px;">
+              <p class="caption">CURRENT BALANCE</p>
+              <p class="num">£2.0M</p>
+            </article>
+            <article class="card metric" style="padding:14px;">
+              <p class="caption">BALANCE REQUESTED</p>
+              <p class="num orange">£1.0M</p>
+            </article>
+            <article class="card metric" style="padding:14px;">
+              <p class="caption">BALANCE REMAINING</p>
+              <p class="num green">£1.0M</p>
+            </article>
+            <article class="card metric" style="padding:14px;">
+              <p class="caption">RESERVE REQUIRED</p>
+              <p class="num purple">£500K</p>
+            </article>
+          </div>
+          <div class="card" style="padding:14px;">
+            <h4 style="margin:0 0 8px; font-size:18px;">Balance History (Last 24 Hours)</h4>
+            <canvas id="issuerChart" height="110"></canvas>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3 style="margin:0 0 10px;">Swap History</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Description</th>
+                  <th>Counterparty</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Tx ID</th>
+                </tr>
+              </thead>
+              <tbody id="issuerHistoryBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="page" id="page-admin">
+        <section class="card">
+          <div class="header-row">
+            <h3>Operations Control Board</h3>
+            <div style="display:flex; gap:8px;">
+              <button class="btn">Filter Member</button>
+              <button class="btn">Filter Status</button>
+              <button class="btn warn" id="pauseBtn">Pause Selected</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sel</th>
+                  <th>ID</th>
+                  <th>Member</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Amount</th>
+                  <th>Updated</th>
+                </tr>
+              </thead>
+              <tbody id="adminBody"></tbody>
+            </table>
+          </div>
+          <div class="feedback" id="adminFeedback"></div>
+        </section>
+      </section>
+
+      <section class="page" id="page-audit">
+        <section class="card">
+          <h3 style="margin:0; font-size:40px;">Audit Log</h3>
+          <p class="section-subtitle">Immutable record of all orchestration events</p>
+          <div class="form-grid" style="margin-top:0;">
+            <div class="field">
+              <label for="fActor">Actor</label>
+              <input id="fActor" placeholder="System / Member / Admin">
+            </div>
+            <div class="field">
+              <label for="fEvent">Event</label>
+              <input id="fEvent" placeholder="EARMARK / CANCEL / FINALIZED">
+            </div>
+            <div class="field">
+              <label for="fRef">Reference</label>
+              <input id="fRef" placeholder="swap-7a3f01">
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button class="btn primary" id="applyAuditFilter">Apply Filter</button>
+            </div>
+            <div class="field">
+              <label>&nbsp;</label>
+              <button class="btn" id="clearAuditFilter">Clear</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Event</th>
+                  <th>Reference</th>
+                  <th>Detail</th>
+                </tr>
+              </thead>
+              <tbody id="auditBody"></tbody>
+            </table>
+          </div>
+          <div class="feedback" id="auditFeedback"></div>
+          <div class="footer-hint">
+            <span>RTGS (Synchro Lab): <b style="color:#1fa27f;">Connected</b></span>
+            <span>On-Chain: <b style="color:#1fa27f;">Operational</b></span>
+            <span>Model: <b>1 (SO-initiated)</b></span>
+            <span>© 2026 Nuvante · BoE Synchronisation Lab · Cohort B</span>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      txns: [
+        {
+          id: "swap-7a3f01",
+          pair: "GBPA → GBPB",
+          client: "Institutional Client A",
+          amount: 250000,
+          status: "EARMARKED",
+          badge: "status-earmarked",
+          note: "Scenario 1A",
+          cancellable: true,
+          timelineStep: 2
+        },
+        {
+          id: "swap-4b2e09",
+          pair: "GBPB → GBPA",
+          client: "Institutional Client B",
+          amount: 100000,
+          status: "COMPLETE",
+          badge: "status-complete",
+          note: "Scenario 1A",
+          cancellable: false,
+          timelineStep: 6
+        },
+        {
+          id: "swap-9c1d77",
+          pair: "GBPA → GBPB",
+          client: "Institutional Client C",
+          amount: 500000,
+          status: "FAILED NO LIQUIDITY",
+          badge: "status-failed",
+          note: "Scenario 1B",
+          cancellable: false,
+          timelineStep: 2
+        }
+      ],
+      selectedId: "swap-7a3f01",
+      issuerHistory: [
+        { time: "2026-04-19 14:23:01", desc: "GBPA → GBPB swap (pending)", cp: "Issuer B", amount: "-£1,000,000.00", status: "Pending", txid: "c93a17" },
+        { time: "2026-04-19 13:30:44", desc: "GBPA → GBPB swap", cp: "Issuer B", amount: "-£200,000.00", status: "Completed", txid: "b47f82" },
+        { time: "2026-04-19 09:15:22", desc: "GBPA → GBPB swap", cp: "Issuer B", amount: "-£300,000.00", status: "Completed", txid: "a12e09" }
+      ],
+      audit: [
+        { time: "09:13:02", actor: "System", event: "EARMARK_CONFIRMED", ref: "swap-7a3f01", detail: "Transaction earmarked, funds reserved", cls: "status-earmarked" },
+        { time: "09:12:47", actor: "System", event: "EARMARK_REQUESTED", ref: "swap-7a3f01", detail: "Multilateral Settlement Message sent to BoE", cls: "status-earmarked" },
+        { time: "09:12:45", actor: "System", event: "ASSET_LOCKED", ref: "swap-7a3f01", detail: "GBPA escrowed in SO wallet GDS0...NV3E", cls: "status-earmarked" },
+        { time: "09:12:34", actor: "System", event: "KYT_PASSED", ref: "swap-7a3f01", detail: "KYT/risk checks passed", cls: "status-complete" },
+        { time: "09:12:33", actor: "Member", event: "SWAP_INITIATED", ref: "swap-7a3f01", detail: "Client A requested GBPA → GBPB swap, £250,000", cls: "status-earmarked" },
+        { time: "08:46:10", actor: "System", event: "FINALIZED", ref: "swap-4b2e09", detail: "Outbound Stablecoin released to OxD4...8B2F", cls: "status-complete" },
+        { time: "08:45:52", actor: "System", event: "RTGS_SETTLED", ref: "swap-4b2e09", detail: "Modify transaction processed, settlement confirmed", cls: "status-complete" },
+        { time: "07:45:35", actor: "System", event: "ASSET_RETURNED", ref: "swap-9c1d77", detail: "GBPA returned to Client C wallet", cls: "status-failed" },
+        { time: "07:45:20", actor: "Admin", event: "EARMARK_CANCELLED", ref: "swap-9c1d77", detail: "Cancel transaction: SVNR (no liquidity)", cls: "status-failed" }
+      ]
+    };
+
+    const timelineSteps = [
+      "Initiated",
+      "Asset Locked",
+      "Earmarked",
+      "Pre-mint OK",
+      "Settled",
+      "Burn",
+      "Finalized"
+    ];
+
+    function toMoney(num) {
+      return `£${Number(num).toLocaleString()}.00`;
+    }
+
+    function renderTxnList() {
+      const list = document.getElementById("txnList");
+      list.innerHTML = "";
+      state.txns.forEach((txn) => {
+        const row = document.createElement("article");
+        row.className = "txn-item";
+        row.innerHTML = `
+          <div>
+            <strong>${txn.pair}</strong>
+            <p>${txn.client} · ${toMoney(txn.amount)}</p>
+          </div>
+          <div>
+            <span class="badge ${txn.badge}">${txn.status}</span>
+            <p style="margin:4px 0 0; text-align:right; font-size:13px; color:#8ea0b8;">${txn.note}</p>
+          </div>
+          <div class="row-action">
+            <button class="btn" data-action="view" data-id="${txn.id}">View</button>
+            <button class="btn warn" data-action="cancel" data-id="${txn.id}" ${txn.cancellable ? "" : "disabled"}>Cancel</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+      const active = state.txns.filter((t) => t.cancellable).length;
+      document.getElementById("activeSwaps").textContent = String(active);
+    }
+
+    function renderTimeline() {
+      const current = state.txns.find((t) => t.id === state.selectedId) || state.txns[0];
+      const container = document.getElementById("timelineContainer");
+      container.innerHTML = "";
+      const row = document.createElement("div");
+      row.className = "timeline-row";
+      timelineSteps.forEach((name, idx) => {
+        const cls = idx < current.timelineStep ? "done" : idx === current.timelineStep ? "current" : "";
+        const el = document.createElement("div");
+        el.className = `step ${cls}`;
+        el.innerHTML = `
+          <div class="circle"></div>
+          <b>${name}</b>
+          <span>${idx === current.timelineStep ? "Current step" : idx < current.timelineStep ? "Completed" : "Pending"}</span>
+        `;
+        row.appendChild(el);
+      });
+      container.appendChild(row);
+      document.getElementById("detailTitleId").textContent = current.id;
+      document.getElementById("detailAmount").textContent = toMoney(current.amount);
+      document.getElementById("detailStatusBadge").textContent = current.status;
+      document.getElementById("detailStatusBadge").className = `badge ${current.badge}`;
+      document.getElementById("rtgsStatus").textContent = current.status.includes("FAILED") ? "FAILED" : current.status;
+      document.getElementById("cancelDetailBtn").disabled = !current.cancellable;
+    }
+
+    function renderIssuerHistory() {
+      const body = document.getElementById("issuerHistoryBody");
+      body.innerHTML = "";
+      state.issuerHistory.forEach((h) => {
+        const cls = h.status === "Completed" ? "status-complete" : "status-pending";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${h.time}</td>
+          <td>${h.desc}</td>
+          <td>${h.cp}</td>
+          <td style="color:#ce6666;">${h.amount}</td>
+          <td><span class="badge ${cls}">${h.status}</span></td>
+          <td class="mono">${h.txid}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAdmin() {
+      const body = document.getElementById("adminBody");
+      body.innerHTML = "";
+      state.txns.forEach((txn) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="checkbox" data-id="${txn.id}"></td>
+          <td class="mono">${txn.id}</td>
+          <td>${txn.client}</td>
+          <td>${txn.pair}</td>
+          <td><span class="badge ${txn.badge}">${txn.status}</span></td>
+          <td>${toMoney(txn.amount)}</td>
+          <td>${txn.id === "swap-7a3f01" ? "09:13:02" : txn.id === "swap-4b2e09" ? "08:46:10" : "07:45:35"}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAudit(list = state.audit) {
+      const body = document.getElementById("auditBody");
+      body.innerHTML = "";
+      list.forEach((a) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${a.time}</td>
+          <td><span class="badge ${a.cls}">${a.event}</span></td>
+          <td class="mono">${a.ref}</td>
+          <td>${a.detail}</td>
+        `;
+        body.appendChild(tr);
+      });
+      document.getElementById("auditFeedback").textContent = `当前显示 ${list.length} 条日志`;
+    }
+
+    function initChart() {
+      const ctx = document.getElementById("issuerChart");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["00:00", "04:00", "08:00", "09:16", "12:00", "13:31", "14:23", "Now"],
+          datasets: [
+            {
+              label: "Account Balance",
+              data: [2.5, 2.5, 2.5, 2.2, 2.2, 2.0, 2.0, 1.0],
+              borderColor: "#5b76e7",
+              backgroundColor: "rgba(91, 118, 231, 0.08)",
+              stepped: true,
+              fill: true,
+              borderWidth: 2
+            },
+            {
+              label: "Reserve Threshold (£500K)",
+              data: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+              borderColor: "#e37f7f",
+              borderDash: [6, 4],
+              pointRadius: 0,
+              borderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } },
+          scales: {
+            y: {
+              min: 0,
+              max: 2.8,
+              ticks: {
+                callback: (value) => `£${value}M`
+              },
+              grid: { color: "#edf1f6" }
+            },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll(".mode-nav button").forEach((button) => {
+      button.addEventListener("click", () => {
+        const page = button.dataset.page;
+        document.querySelectorAll(".mode-nav button").forEach((b) => b.classList.remove("active"));
+        button.classList.add("active");
+        document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+        document.getElementById(`page-${page}`).classList.add("active");
+      });
+    });
+
+    document.getElementById("instructionForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const feedback = document.getElementById("memberFeedback");
+      const amountRaw = document.getElementById("amount").value;
+      const amount = Number(amountRaw);
+      const from = document.getElementById("from").value;
+      const to = document.getElementById("to").value;
+      if (!amount || amount <= 0) {
+        feedback.className = "feedback err";
+        feedback.textContent = "请输入合法金额。";
+        return;
+      }
+      if (amount > 1200000) {
+        feedback.className = "feedback err";
+        feedback.textContent = "余额不足，无法提交该交易。";
+        return;
+      }
+      const id = `swap-${Math.random().toString(16).slice(2, 8)}`;
+      state.txns.unshift({
+        id,
+        pair: `${from} → ${to.replace(" (fiat)", "")}`,
+        client: "Institutional Client A",
+        amount,
+        status: "EARMARKED",
+        badge: "status-earmarked",
+        note: "Scenario 1A",
+        cancellable: true,
+        timelineStep: 2
+      });
+      state.audit.unshift({
+        time: new Date().toTimeString().slice(0, 8),
+        actor: "Member",
+        event: "SWAP_INITIATED",
+        ref: id,
+        detail: `New instruction submitted: ${from} -> ${to}, ${toMoney(amount)}`,
+        cls: "status-earmarked"
+      });
+      feedback.className = "feedback ok";
+      feedback.textContent = `提交成功，Instruction ID: ${id}`;
+      document.getElementById("amount").value = "";
+      renderTxnList();
+      renderAdmin();
+      renderAudit();
+    });
+
+    document.getElementById("txnList").addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      const action = target.dataset.action;
+      const id = target.dataset.id;
+      if (!action || !id) return;
+      const txn = state.txns.find((t) => t.id === id);
+      if (!txn) return;
+      if (action === "view") {
+        state.selectedId = id;
+        renderTimeline();
+        document.querySelectorAll(".mode-nav button").forEach((b) => b.classList.remove("active"));
+        document.querySelector('.mode-nav button[data-page="detail"]').classList.add("active");
+        document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+        document.getElementById("page-detail").classList.add("active");
+      }
+      if (action === "cancel") {
+        const feedback = document.getElementById("memberFeedback");
+        if (!txn.cancellable) {
+          feedback.className = "feedback err";
+          feedback.textContent = "当前状态不可取消。";
+          return;
+        }
+        txn.cancellable = false;
+        txn.status = "FAILED NO LIQUIDITY";
+        txn.badge = "status-failed";
+        txn.note = "Cancelled";
+        txn.timelineStep = 2;
+        state.audit.unshift({
+          time: new Date().toTimeString().slice(0, 8),
+          actor: "Member",
+          event: "EARMARK_CANCELLED",
+          ref: txn.id,
+          detail: "Cancelled before settlement boundary.",
+          cls: "status-failed"
+        });
+        feedback.className = "feedback ok";
+        feedback.textContent = `${txn.id} 已取消。`;
+        renderTxnList();
+        renderAdmin();
+        renderAudit();
+      }
+    });
+
+    document.getElementById("cancelDetailBtn").addEventListener("click", () => {
+      const feedback = document.getElementById("detailFeedback");
+      const txn = state.txns.find((t) => t.id === state.selectedId);
+      if (!txn) return;
+      if (!txn.cancellable) {
+        feedback.className = "feedback err";
+        feedback.textContent = "Settlement 后不可取消。";
+        return;
+      }
+      txn.cancellable = false;
+      txn.status = "FAILED NO LIQUIDITY";
+      txn.badge = "status-failed";
+      txn.note = "Cancelled";
+      state.audit.unshift({
+        time: new Date().toTimeString().slice(0, 8),
+        actor: "Member",
+        event: "ASSET_RETURNED",
+        ref: txn.id,
+        detail: "Cancelled from transaction detail, asset returned.",
+        cls: "status-failed"
+      });
+      feedback.className = "feedback ok";
+      feedback.textContent = "取消成功，状态已写入审计日志。";
+      renderTxnList();
+      renderTimeline();
+      renderAdmin();
+      renderAudit();
+    });
+
+    document.getElementById("jumpMemberBtn").addEventListener("click", () => {
+      document.querySelectorAll(".mode-nav button").forEach((b) => b.classList.remove("active"));
+      document.querySelector('.mode-nav button[data-page="member"]').classList.add("active");
+      document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+      document.getElementById("page-member").classList.add("active");
+    });
+
+    document.getElementById("pauseBtn").addEventListener("click", () => {
+      const selected = [...document.querySelectorAll('#adminBody input[type="checkbox"]:checked')].map((cb) => cb.dataset.id);
+      const feedback = document.getElementById("adminFeedback");
+      if (selected.length === 0) {
+        feedback.className = "feedback err";
+        feedback.textContent = "请先选择要 Pause 的交易。";
+        return;
+      }
+      selected.forEach((id) => {
+        const txn = state.txns.find((t) => t.id === id);
+        if (!txn) return;
+        txn.status = "EARMARKED";
+        txn.badge = "status-earmarked";
+        txn.note = "Paused by admin";
+        state.audit.unshift({
+          time: new Date().toTimeString().slice(0, 8),
+          actor: "Admin",
+          event: "PAUSE_APPLIED",
+          ref: id,
+          detail: "Transaction paused and retained in earmarked queue.",
+          cls: "status-earmarked"
+        });
+      });
+      feedback.className = "feedback ok";
+      feedback.textContent = `已暂停 ${selected.length} 条交易。`;
+      renderTxnList();
+      renderAdmin();
+      renderAudit();
+      renderTimeline();
+    });
+
+    document.getElementById("applyAuditFilter").addEventListener("click", () => {
+      const actor = document.getElementById("fActor").value.trim().toLowerCase();
+      const event = document.getElementById("fEvent").value.trim().toLowerCase();
+      const ref = document.getElementById("fRef").value.trim().toLowerCase();
+      const filtered = state.audit.filter((row) => {
+        const actorOk = !actor || row.actor.toLowerCase().includes(actor);
+        const eventOk = !event || row.event.toLowerCase().includes(event);
+        const refOk = !ref || row.ref.toLowerCase().includes(ref);
+        return actorOk && eventOk && refOk;
+      });
+      renderAudit(filtered);
+    });
+
+    document.getElementById("clearAuditFilter").addEventListener("click", () => {
+      document.getElementById("fActor").value = "";
+      document.getElementById("fEvent").value = "";
+      document.getElementById("fRef").value = "";
+      renderAudit();
+    });
+
+    renderTxnList();
+    renderTimeline();
+    renderIssuerHistory();
+    renderAdmin();
+    renderAudit();
+    initChart();
+  </script>
+</body>
+</html>
+-->
+<!--
+<!doctype html>
+<html lang="zh-CN" data-theme="dark" data-style="professional">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuvante Clearing Platform - Interactive Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --radius: 14px;
+      --radius-sm: 10px;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+      --border: rgba(255, 255, 255, 0.08);
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --err: #ef4444;
+      --info: #38bdf8;
+      --queued: #fbbf24;
+      --settled: #22c55e;
+      --cancelled: #a78bfa;
+      --exception: #f87171;
+      --inflight: #38bdf8;
+    }
+
+    html[data-theme="dark"] {
+      --bg: #060b1a;
+      --bg-soft: #0f172a;
+      --panel: #111b33;
+      --panel-2: #172547;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --brand: #60a5fa;
+      --brand-2: #a78bfa;
+      --line: rgba(148, 163, 184, 0.18);
+      --input: #101b36;
+    }
+
+    html[data-theme="light"] {
+      --bg: #f3f6fb;
+      --bg-soft: #ffffff;
+      --panel: #ffffff;
+      --panel-2: #f9fbff;
+      --text: #0f172a;
+      --muted: #475569;
+      --brand: #1d4ed8;
+      --brand-2: #7c3aed;
+      --line: rgba(15, 23, 42, 0.1);
+      --input: #ffffff;
+      --shadow: 0 14px 26px rgba(15, 23, 42, 0.08);
+      --border: rgba(15, 23, 42, 0.08);
+    }
+
+    html[data-style="glass"] .panel,
+    html[data-style="glass"] .card,
+    html[data-style="glass"] .table-wrap,
+    html[data-style="glass"] .timeline {
+      backdrop-filter: blur(12px);
+      background: color-mix(in oklab, var(--panel), transparent 25%);
+      border: 1px solid color-mix(in oklab, var(--brand), var(--line) 80%);
+    }
+
+    html[data-style="dense"] {
+      --radius: 10px;
+      --radius-sm: 8px;
+    }
+
+    html[data-style="dense"] .grid-3 {
+      gap: 10px;
+    }
+
+    html[data-style="dense"] .card,
+    html[data-style="dense"] .panel {
+      padding: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, color-mix(in oklab, var(--brand), transparent 85%), transparent 40%),
+        radial-gradient(circle at 100% 0%, color-mix(in oklab, var(--brand-2), transparent 85%), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: color-mix(in oklab, var(--bg-soft), transparent 10%);
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 0 0 5px color-mix(in oklab, var(--brand), transparent 82%);
+    }
+
+    .brand h1 {
+      font-size: 16px;
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .segmented,
+    .role-nav {
+      display: inline-flex;
+      gap: 4px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px;
+      background: color-mix(in oklab, var(--panel), transparent 20%);
+    }
+
+    button,
+    select,
+    input {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .segmented button,
+    .role-nav button {
+      border: 0;
+      border-radius: 999px;
+      padding: 7px 11px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      transition: 180ms ease;
+      font-size: 12px;
+    }
+
+    .segmented button.active,
+    .role-nav button.active {
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      box-shadow: 0 4px 12px color-mix(in oklab, var(--brand), transparent 70%);
+    }
+
+    .layout {
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .subtitle {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid-3,
+    .grid-4,
+    .grid-2 {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--panel-2);
+      padding: 14px;
+      min-height: 88px;
+    }
+
+    .kpi {
+      margin: 6px 0 0;
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .field,
+    .input {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--input);
+      border-radius: 10px;
+      height: 38px;
+      padding: 0 10px;
+      outline: none;
+    }
+
+    .field:focus,
+    .input:focus {
+      border-color: color-mix(in oklab, var(--brand), white 10%);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--brand), transparent 80%);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      height: 38px;
+      padding: 0 14px;
+      cursor: pointer;
+      transition: 180ms ease;
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn.ghost {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+    .btn.warn {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+      background: var(--panel-2);
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    tr:hover td {
+      background: color-mix(in oklab, var(--brand), transparent 94%);
+    }
+
+    .status {
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .queued { color: #fff; background: color-mix(in oklab, var(--queued), black 30%); border-color: color-mix(in oklab, var(--queued), white 10%); }
+    .queued .dot { background: var(--queued); }
+    .inflight-status { color: #fff; background: color-mix(in oklab, var(--inflight), black 35%); border-color: color-mix(in oklab, var(--inflight), white 10%); }
+    .inflight-status .dot { background: var(--inflight); }
+    .settled { color: #fff; background: color-mix(in oklab, var(--settled), black 32%); border-color: color-mix(in oklab, var(--settled), white 12%); }
+    .settled .dot { background: var(--settled); }
+    .cancelled { color: #fff; background: color-mix(in oklab, var(--cancelled), black 30%); border-color: color-mix(in oklab, var(--cancelled), white 10%); }
+    .cancelled .dot { background: var(--cancelled); }
+    .exception { color: #fff; background: color-mix(in oklab, var(--exception), black 30%); border-color: color-mix(in oklab, var(--exception), white 10%); }
+    .exception .dot { background: var(--exception); }
+
+    .timeline {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      background: var(--panel-2);
+      display: grid;
+      gap: 10px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .step i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--line);
+      background: transparent;
+    }
+
+    .step.done i { background: var(--ok); border-color: var(--ok); }
+    .step.current i { background: var(--warn); border-color: var(--warn); }
+    .step.pending i { border-color: var(--line); }
+
+    .step small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .notice {
+      border: 1px dashed var(--line);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .feedback {
+      min-height: 18px;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+
+    .feedback.ok { color: var(--ok); }
+    .feedback.err { color: var(--err); }
+    .feedback.warn { color: var(--warn); }
+
+    .page {
+      display: none;
+      animation: fade 180ms ease;
+    }
+
+    .page.active {
+      display: grid;
+      gap: 12px;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 12px;
+    }
+
+    .hidden-mobile {
+      display: inline;
+    }
+
+    @media (max-width: 1080px) {
+      .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split { grid-template-columns: 1fr; }
+      .hidden-mobile { display: none; }
+    }
+
+    @media (max-width: 760px) {
+      .container { padding: 10px; }
+      .topbar { position: static; }
+      .grid-3, .grid-2, .grid-4 { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .controls { justify-content: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true"></div>
+        <div>
+          <h1>Nuvante Clearing Platform <span class="hidden-mobile">Mockup</span></h1>
+          <p>桌面优先 · 支持浅深色 · 交互原型（P0/P1）</p>
+        </div>
+      </div>
+      <div class="controls">
+        <nav class="role-nav" aria-label="页面导航">
+          <button class="active" data-page-target="member">Member</button>
+          <button data-page-target="detail">Detail</button>
+          <button data-page-target="issuer">Issuer</button>
+          <button data-page-target="admin">Admin</button>
+          <button data-page-target="audit">Audit</button>
+        </nav>
+        <div class="segmented" aria-label="主题">
+          <button id="themeLight">浅色</button>
+          <button id="themeDark" class="active">深色</button>
+        </div>
+        <div class="segmented" aria-label="风格">
+          <button class="active" data-style-target="professional">专业</button>
+          <button data-style-target="glass">玻璃</button>
+          <button data-style-target="dense">紧凑</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section id="page-member" class="page active">
+        <div class="panel">
+          <div class="head">
+            <div>
+              <h2 class="title">Clearing Member Dashboard · `/member`</h2>
+              <p class="subtitle">发起稳定币转换/赎回，查看可取消边界与交易状态。</p>
+            </div>
+            <div class="segmented">
+              <button class="active">All</button>
+              <button>Queued</button>
+              <button>In Flight</button>
+              <button>Exception</button>
+            </div>
+          </div>
+          <div class="grid-3">
+            <article class="card">
+              <p class="muted">Available Balance</p>
+              <p class="kpi mono">12,480,000</p>
+              <p class="muted">USDC equivalent</p>
+            </article>
+            <article class="card">
+              <p class="muted">Locked Balance</p>
+              <p class="kpi mono">1,230,000</p>
+              <p class="muted">pending settlement</p>
+            </article>
+            <article class="card">
+              <p class="muted">In Flight Transactions</p>
+              <p class="kpi mono" id="kpiInflight">3</p>
+              <p class="muted">actively progressing</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="head">
+            <div>
+              <h2 class="title">New Instruction</h2>
+              <p class="subtitle">支持 `Stablecoin ↔ Stablecoin` 与 `Stablecoin ↔ Fiat`。</p>
+            </div>
+          </div>
+          <form id="instructionForm" class="form-grid">
+            <div>
+              <label for="txnType">Txn Type</label>
+              <select id="txnType" class="field">
+                <option value="S2S">Stablecoin → Stablecoin</option>
+                <option value="S2F">Stablecoin → Fiat</option>
+              </select>
+            </div>
+            <div>
+              <label for="fromAsset">From Asset</label>
+              <select id="fromAsset" class="field">
+                <option>USDC</option>
+                <option>GBPT</option>
+                <option>EURT</option>
+              </select>
+            </div>
+            <div>
+              <label for="toAsset">To Asset</label>
+              <select id="toAsset" class="field">
+                <option>GBPT</option>
+                <option>USDC</option>
+                <option>GBP (Fiat)</option>
+              </select>
+            </div>
+            <div>
+              <label for="amount">Amount</label>
+              <input id="amount" class="input mono" placeholder="e.g. 250000" inputmode="numeric">
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn" id="submitBtn" type="submit">Submit Instruction</button>
+            </div>
+          </form>
+          <div id="submitFeedback" class="feedback" aria-live="polite"></div>
+        </div>
+
+        <div class="panel">
+          <div class="head">
+            <div>
+              <h2 class="title">My Transactions</h2>
+              <p class="subtitle">点击 View 可跳转详情；仅 settlement 前可取消。</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Instruction ID</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Amount</th>
+                  <th>Updated</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="memberTxnBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-detail" class="page">
+        <div class="panel">
+          <div class="head">
+            <div>
+              <h2 class="title">Member Transaction Detail · `/member/transactions/:id`</h2>
+              <p class="subtitle">状态时间线 + 异常信息 + 可取消性。</p>
+            </div>
+            <button class="btn ghost" id="backToMember">Back to List</button>
+          </div>
+          <div class="grid-3">
+            <article class="card">
+              <p class="muted">Instruction ID</p>
+              <p class="kpi mono" id="detailId">NVT-240422-001</p>
+            </article>
+            <article class="card">
+              <p class="muted">Type</p>
+              <p class="kpi mono" id="detailType">S2S</p>
+            </article>
+            <article class="card">
+              <p class="muted">Amount</p>
+              <p class="kpi mono" id="detailAmount">380,000</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="panel">
+            <h3 class="title">Timeline</h3>
+            <p class="subtitle">Received → Queued → Earmarked → Burn → Mint → Settled</p>
+            <div class="timeline" id="timelineSteps"></div>
+          </div>
+          <div class="panel">
+            <h3 class="title">Notes / Errors / Recovery</h3>
+            <p class="subtitle" id="detailNote">当前交易运行正常，无异常收口动作。</p>
+            <div class="notice">
+              取消规则：当状态进入 `Settled` 之后，取消按钮禁用并给出明确提示。
+            </div>
+            <div class="footer-actions" style="margin-top: 12px;">
+              <button id="cancelFromDetail" class="btn warn">Cancel Transaction</button>
+              <button class="btn ghost">Refresh Status</button>
+            </div>
+            <div id="detailFeedback" class="feedback"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-issuer" class="page">
+        <div class="panel">
+          <div class="head">
+            <div>
+              <h2 class="title">Stablecoin Issuer Dashboard · `/issuer`</h2>
+              <p class="subtitle">展示供应量、储备、币种相关交易与 Model 2 待处理动作。</p>
+            </div>
+            <div class="segmented">
+              <button class="active">USDC Issuer</button>
+              <button>GBPT Issuer</button>
+            </div>
+          </div>
+          <div class="grid-3">
+            <article class="card">
+              <p class="muted">Issued Supply</p>
+              <p class="kpi mono">98,700,000</p>
+              <p class="muted">tokens minted</p>
+            </article>
+            <article class="card">
+              <p class="muted">Backing Reserves</p>
+              <p class="kpi mono">99,100,000</p>
+              <p class="muted">fiat collateral</p>
+            </article>
+            <article class="card">
+              <p class="muted">Reserve Threshold</p>
+              <p class="kpi mono">102%</p>
+              <p class="muted">safe margin</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="panel">
+            <div class="head">
+              <div>
+                <h3 class="title">Transactions Involving My Coin</h3>
+                <p class="subtitle">发行方相关交易活动列表。</p>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Instruction ID</th>
+                    <th>Type</th>
+                    <th>Counter Asset</th>
+                    <th>Status</th>
+                    <th>Updated</th>
+                  </tr>
+                </thead>
+                <tbody id="issuerTxnBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 class="title">Model 2 Pending Actions</h3>
+            <p class="subtitle">预留流程变体：Issuer 参与 settlement 指令处理。</p>
+            <div class="card" style="margin-bottom: 10px;">
+              <p class="muted">Pending Instruction</p>
+              <p class="kpi mono" style="font-size:16px;">NVT-240422-017</p>
+              <p class="muted">Action: confirm settlement leg</p>
+              <div class="footer-actions" style="margin-top:8px;">
+                <button class="btn">Accept Action</button>
+                <button class="btn ghost">Inspect Details</button>
+              </div>
+            </div>
+            <button class="btn ghost" disabled title="BoE Lab environment unavailable">
+              Withdraw from RTGS (Disabled in Lab)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-admin" class="page">
+        <div class="panel">
+          <div class="head">
+            <div>
+              <h2 class="title">Nuvante Admin Dashboard · `/admin`</h2>
+              <p class="subtitle">全量交易、队列、异常、RTGS 余额与实验控制。</p>
+            </div>
+            <div class="footer-actions">
+              <button class="btn ghost">Filter Status</button>
+              <button class="btn ghost">Filter Member</button>
+            </div>
+          </div>
+          <div class="grid-4">
+            <article class="card">
+              <p class="muted">Total Transactions</p>
+              <p class="kpi mono">248</p>
+            </article>
+            <article class="card">
+              <p class="muted">Queued</p>
+              <p class="kpi mono">18</p>
+            </article>
+            <article class="card">
+              <p class="muted">Exceptions</p>
+              <p class="kpi mono">7</p>
+            </article>
+            <article class="card">
+              <p class="muted">RTGS Balance</p>
+              <p class="kpi mono">14.2M</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="split">
+          <div class="panel">
+            <div class="head">
+              <div>
+                <h3 class="title">Transactions / Queue</h3>
+                <p class="subtitle">可执行 Pause 与 Override/Test Control。</p>
+              </div>
+              <div class="footer-actions">
+                <button class="btn warn" id="pauseSelected">Pause Selected</button>
+                <button class="btn">Override / Test Control</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Sel</th>
+                    <th>ID</th>
+                    <th>Member</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Asset</th>
+                    <th>Updated</th>
+                  </tr>
+                </thead>
+                <tbody id="adminTxnBody"></tbody>
+              </table>
+            </div>
+            <div id="adminFeedback" class="feedback"></div>
+          </div>
+          <div class="panel">
+            <h3 class="title">Settlement Throughput Trend</h3>
+            <p class="subtitle">用于观察近 7 个时间窗口的处理情况（示意）。</p>
+            <canvas id="trendChart" height="180" aria-label="trend chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-audit" class="page">
+        <div class="panel">
+          <div class="head">
+            <div>
+              <h2 class="title">Audit Log · `/admin/audit-log`</h2>
+              <p class="subtitle">按 Actor / Action / Instruction ID 检索审计轨迹。</p>
+            </div>
+          </div>
+          <div class="grid-4" style="margin-bottom:10px;">
+            <input class="input" id="auditActor" placeholder="Actor (Admin / System / Issuer)">
+            <input class="input" id="auditAction" placeholder="Action (Pause / Cancel / Override)">
+            <input class="input mono" id="auditInstruction" placeholder="Instruction ID">
+            <button class="btn" id="filterAudit">Apply Filters</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Actor</th>
+                  <th>Action</th>
+                  <th>Instruction ID</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody id="auditBody"></tbody>
+            </table>
+          </div>
+          <div id="auditFeedback" class="feedback"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      transactions: [
+        { id: "NVT-240422-001", type: "S2S", from: "USDC", to: "GBPT", amount: 380000, status: "In Flight", updated: "09:42", cancellable: true, note: "Running smoothly.", timelineIndex: 4 },
+        { id: "NVT-240422-004", type: "S2F", from: "GBPT", to: "GBP", amount: 120000, status: "Queued", updated: "09:47", cancellable: true, note: "Awaiting earmark response.", timelineIndex: 2 },
+        { id: "NVT-240422-006", type: "S2S", from: "EURT", to: "USDC", amount: 560000, status: "Settled", updated: "09:30", cancellable: false, note: "Settlement completed.", timelineIndex: 6 },
+        { id: "NVT-240422-009", type: "S2F", from: "USDC", to: "GBP", amount: 210000, status: "Exception", updated: "09:15", cancellable: true, note: "Earmark timeout. Retry pending.", timelineIndex: 3 }
+      ],
+      selectedTxnId: "NVT-240422-001",
+      auditLogs: [
+        { ts: "2026-04-22 09:12:03", actor: "System", action: "SettleEarmark", id: "NVT-240422-006", note: "Settlement confirmed by BoE Lab." },
+        { ts: "2026-04-22 09:16:51", actor: "System", action: "EarmarkRetry", id: "NVT-240422-009", note: "Timeout detected, moved to exception queue." },
+        { ts: "2026-04-22 09:48:27", actor: "Member", action: "SubmitInstruction", id: "NVT-240422-004", note: "Instruction created via member portal." }
+      ]
+    };
+
+    const timelineOrder = ["Received", "Queued", "Earmarked", "Burn", "Mint/Fiat Release", "Settled/Cancelled"];
+
+    function statusClass(status) {
+      if (status === "Queued") return "queued";
+      if (status === "In Flight") return "inflight-status";
+      if (status === "Settled") return "settled";
+      if (status === "Cancelled") return "cancelled";
+      return "exception";
+    }
+
+    function fmtAmount(v) {
+      return Number(v).toLocaleString();
+    }
+
+    function selectPage(name) {
+      document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+      document.querySelectorAll(".role-nav button").forEach((b) => b.classList.remove("active"));
+      const page = document.getElementById(`page-${name}`);
+      if (page) page.classList.add("active");
+      document.querySelector(`.role-nav button[data-page-target="${name}"]`)?.classList.add("active");
+    }
+
+    function renderMemberTable() {
+      const body = document.getElementById("memberTxnBody");
+      body.innerHTML = "";
+      state.transactions.forEach((t) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="mono">${t.id}</td>
+          <td>${t.type} <span class="muted">(${t.from}→${t.to})</span></td>
+          <td><span class="status ${statusClass(t.status)}"><span class="dot"></span>${t.status}</span></td>
+          <td class="mono">${fmtAmount(t.amount)}</td>
+          <td>${t.updated}</td>
+          <td>
+            <button class="btn ghost" data-action="view" data-id="${t.id}">View</button>
+            <button class="btn ghost" data-action="cancel" data-id="${t.id}" ${t.cancellable ? "" : "disabled"}>Cancel</button>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+      const inflight = state.transactions.filter((t) => t.status === "In Flight" || t.status === "Queued").length;
+      document.getElementById("kpiInflight").textContent = String(inflight);
+    }
+
+    function renderDetail() {
+      const txn = state.transactions.find((t) => t.id === state.selectedTxnId) || state.transactions[0];
+      if (!txn) return;
+      document.getElementById("detailId").textContent = txn.id;
+      document.getElementById("detailType").textContent = txn.type + ` (${txn.from}→${txn.to})`;
+      document.getElementById("detailAmount").textContent = fmtAmount(txn.amount);
+      document.getElementById("detailNote").textContent = txn.note;
+
+      const timeline = document.getElementById("timelineSteps");
+      timeline.innerHTML = "";
+      timelineOrder.forEach((step, idx) => {
+        const row = document.createElement("div");
+        let cls = "pending";
+        if (idx < txn.timelineIndex) cls = "done";
+        else if (idx === txn.timelineIndex) cls = "current";
+        row.className = `step ${cls}`;
+        row.innerHTML = `<i></i><span>${step}</span><small>${idx < txn.timelineIndex ? "done" : idx === txn.timelineIndex ? "current" : "pending"}</small>`;
+        timeline.appendChild(row);
+      });
+
+      const cancelBtn = document.getElementById("cancelFromDetail");
+      cancelBtn.disabled = !txn.cancellable;
+      cancelBtn.textContent = txn.cancellable ? "Cancel Transaction" : "Settlement 后不可取消";
+    }
+
+    function renderIssuerTable() {
+      const body = document.getElementById("issuerTxnBody");
+      body.innerHTML = "";
+      state.transactions.slice(0, 3).forEach((t) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="mono">${t.id}</td>
+          <td>${t.type}</td>
+          <td>${t.to}</td>
+          <td><span class="status ${statusClass(t.status)}"><span class="dot"></span>${t.status}</span></td>
+          <td>${t.updated}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAdminTable() {
+      const body = document.getElementById("adminTxnBody");
+      body.innerHTML = "";
+      state.transactions.forEach((t) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="checkbox" data-select-id="${t.id}"></td>
+          <td class="mono">${t.id}</td>
+          <td>Member-A</td>
+          <td>${t.type}</td>
+          <td><span class="status ${statusClass(t.status)}"><span class="dot"></span>${t.status}</span></td>
+          <td>${t.from}/${t.to}</td>
+          <td>${t.updated}</td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function renderAudit(rows = state.auditLogs) {
+      const body = document.getElementById("auditBody");
+      body.innerHTML = "";
+      rows.forEach((log) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="mono">${log.ts}</td>
+          <td>${log.actor}</td>
+          <td>${log.action}</td>
+          <td class="mono">${log.id}</td>
+          <td>${log.note}</td>
+        `;
+        body.appendChild(tr);
+      });
+      document.getElementById("auditFeedback").textContent = `共 ${rows.length} 条记录`;
+    }
+
+    function pushAudit(actor, action, id, note) {
+      state.auditLogs.unshift({
+        ts: new Date().toISOString().slice(0, 19).replace("T", " "),
+        actor, action, id, note
+      });
+      renderAudit();
+    }
+
+    function initChart() {
+      const ctx = document.getElementById("trendChart");
+      if (!ctx) return;
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["09:00", "09:10", "09:20", "09:30", "09:40", "09:50", "10:00"],
+          datasets: [
+            {
+              label: "Settled",
+              data: [4, 6, 8, 7, 10, 11, 13],
+              borderColor: "#22c55e",
+              backgroundColor: "rgba(34,197,94,0.18)",
+              fill: true,
+              tension: 0.35
+            },
+            {
+              label: "Exceptions",
+              data: [2, 3, 2, 4, 3, 4, 3],
+              borderColor: "#ef4444",
+              backgroundColor: "rgba(239,68,68,0.1)",
+              fill: true,
+              tension: 0.35
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue("--text") } }
+          },
+          scales: {
+            x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted") }, grid: { color: "rgba(148,163,184,0.12)" } },
+            y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted") }, grid: { color: "rgba(148,163,184,0.12)" } }
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll(".role-nav button").forEach((btn) => {
+      btn.addEventListener("click", () => selectPage(btn.dataset.pageTarget));
+    });
+
+    document.getElementById("themeLight").addEventListener("click", () => {
+      document.documentElement.dataset.theme = "light";
+      document.getElementById("themeLight").classList.add("active");
+      document.getElementById("themeDark").classList.remove("active");
+    });
+    document.getElementById("themeDark").addEventListener("click", () => {
+      document.documentElement.dataset.theme = "dark";
+      document.getElementById("themeDark").classList.add("active");
+      document.getElementById("themeLight").classList.remove("active");
+    });
+
+    document.querySelectorAll("[data-style-target]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.documentElement.dataset.style = btn.dataset.styleTarget;
+        document.querySelectorAll("[data-style-target]").forEach((it) => it.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    document.getElementById("instructionForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const feedback = document.getElementById("submitFeedback");
+      const amount = Number(document.getElementById("amount").value);
+      const from = document.getElementById("fromAsset").value;
+      const to = document.getElementById("toAsset").value;
+      const type = document.getElementById("txnType").value;
+      const submitBtn = document.getElementById("submitBtn");
+      feedback.className = "feedback";
+
+      if (!amount || amount <= 0) {
+        feedback.textContent = "请输入有效金额。";
+        feedback.classList.add("err");
+        return;
+      }
+      if (amount > 9999999) {
+        feedback.textContent = "余额不足，无法提交该交易。";
+        feedback.classList.add("err");
+        return;
+      }
+      if (from === to && to !== "GBP (Fiat)") {
+        feedback.textContent = "From/To 资产不能相同。";
+        feedback.classList.add("warn");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      feedback.textContent = "提交中...";
+      feedback.classList.add("warn");
+
+      setTimeout(() => {
+        const newId = `NVT-${new Date().toISOString().slice(2, 10).replaceAll("-", "")}-${String(Math.floor(Math.random() * 900) + 100)}`;
+        state.transactions.unshift({
+          id: newId,
+          type,
+          from,
+          to: to.replace(" (Fiat)", ""),
+          amount,
+          status: "Queued",
+          updated: new Date().toTimeString().slice(0, 5),
+          cancellable: true,
+          note: "Instruction accepted and queued.",
+          timelineIndex: 1
+        });
+        pushAudit("Member", "SubmitInstruction", newId, "Instruction created from member dashboard.");
+        renderMemberTable();
+        renderAdminTable();
+        renderIssuerTable();
+        feedback.className = "feedback ok";
+        feedback.textContent = `提交成功，Instruction ID: ${newId}`;
+        submitBtn.disabled = false;
+        document.getElementById("amount").value = "";
+      }, 700);
+    });
+
+    document.getElementById("memberTxnBody").addEventListener("click", (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      const id = target.getAttribute("data-id");
+      const action = target.getAttribute("data-action");
+      if (!id || !action) return;
+
+      const txn = state.transactions.find((t) => t.id === id);
+      if (!txn) return;
+
+      if (action === "view") {
+        state.selectedTxnId = id;
+        renderDetail();
+        selectPage("detail");
+      }
+
+      if (action === "cancel") {
+        const feedback = document.getElementById("submitFeedback");
+        feedback.className = "feedback";
+        if (!txn.cancellable) {
+          feedback.classList.add("warn");
+          feedback.textContent = "Settlement 后不可取消。";
+          return;
+        }
+        txn.status = "Cancelled";
+        txn.cancellable = false;
+        txn.updated = new Date().toTimeString().slice(0, 5);
+        txn.timelineIndex = 5;
+        txn.note = "Cancelled before final settlement.";
+        pushAudit("Member", "CancelInstruction", id, "Cancelled in allowed stage.");
+        renderMemberTable();
+        renderAdminTable();
+        renderIssuerTable();
+        feedback.classList.add("ok");
+        feedback.textContent = `${id} 已取消。`;
+      }
+    });
+
+    document.getElementById("cancelFromDetail").addEventListener("click", () => {
+      const txn = state.transactions.find((t) => t.id === state.selectedTxnId);
+      const feedback = document.getElementById("detailFeedback");
+      feedback.className = "feedback";
+      if (!txn) return;
+      if (!txn.cancellable) {
+        feedback.classList.add("warn");
+        feedback.textContent = "该交易已进入不可取消阶段。";
+        return;
+      }
+      txn.status = "Cancelled";
+      txn.cancellable = false;
+      txn.updated = new Date().toTimeString().slice(0, 5);
+      txn.timelineIndex = 5;
+      txn.note = "Cancelled from detail page before settlement.";
+      pushAudit("Member", "CancelInstruction", txn.id, "Cancelled from detail page.");
+      renderMemberTable();
+      renderAdminTable();
+      renderIssuerTable();
+      renderDetail();
+      feedback.classList.add("ok");
+      feedback.textContent = "取消成功，状态已更新。";
+    });
+
+    document.getElementById("backToMember").addEventListener("click", () => selectPage("member"));
+
+    document.getElementById("pauseSelected").addEventListener("click", () => {
+      const checks = [...document.querySelectorAll("[data-select-id]:checked")];
+      const feedback = document.getElementById("adminFeedback");
+      feedback.className = "feedback";
+      if (checks.length === 0) {
+        feedback.classList.add("warn");
+        feedback.textContent = "请先选择至少一条交易。";
+        return;
+      }
+      checks.forEach((cb) => {
+        const id = cb.getAttribute("data-select-id");
+        const txn = state.transactions.find((t) => t.id === id);
+        if (txn && txn.status !== "Settled" && txn.status !== "Cancelled") {
+          txn.status = "Queued";
+          txn.note = "Paused by admin and moved back to queue.";
+          pushAudit("Admin", "PauseTransaction", txn.id, "Paused for lab control.");
+        }
+      });
+      renderMemberTable();
+      renderAdminTable();
+      renderDetail();
+      feedback.classList.add("ok");
+      feedback.textContent = "已执行 Pause，交易状态已回到队列并写入审计日志。";
+    });
+
+    document.getElementById("filterAudit").addEventListener("click", () => {
+      const actor = document.getElementById("auditActor").value.trim().toLowerCase();
+      const action = document.getElementById("auditAction").value.trim().toLowerCase();
+      const instruction = document.getElementById("auditInstruction").value.trim().toLowerCase();
+      const rows = state.auditLogs.filter((log) => {
+        const okActor = !actor || log.actor.toLowerCase().includes(actor);
+        const okAction = !action || log.action.toLowerCase().includes(action);
+        const okId = !instruction || log.id.toLowerCase().includes(instruction);
+        return okActor && okAction && okId;
+      });
+      renderAudit(rows);
+    });
+
+    renderMemberTable();
+    renderDetail();
+    renderIssuerTable();
+    renderAdminTable();
+    renderAudit();
+    initChart();
+  </script>
+</body>
+</html>
+-->
